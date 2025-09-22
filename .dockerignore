@@ -1,0 +1,8 @@
+.husky
+dist
+features
+test
+node_modules
+cucumber-report.*
+.env*
+README.md
