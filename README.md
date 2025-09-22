@@ -50,7 +50,7 @@ $ npm run start:prod
 # unit tests
 $ npm run test
 
-# e2e tests
+# e2e tests (Cucumber)
 $ npm run test:e2e
 
 # test coverage
