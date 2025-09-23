@@ -1,8 +1,15 @@
+import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
-import { FirebaseModule } from './tools-modules/firebase/firebase.module';
-import { SongModule } from './entity-modules/song/song.module';
+import { ConfigModule } from '@nestjs/config';
+import mikroOrmConfig from 'mikro-orm.config';
+
 @Module({
-  imports: [FirebaseModule, SongModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    MikroOrmModule.forRoot({
+      ...mikroOrmConfig,
+    }),
+  ],
   controllers: [],
   providers: [],
 })
