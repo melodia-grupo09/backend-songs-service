@@ -37,7 +37,8 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-argument': 'warn',
       "unused-imports/no-unused-imports": "warn",
       "@typescript-eslint/require-await": "off",
-      "@typescript-eslint/no-empty-object-type": "off"
+      "@typescript-eslint/no-empty-object-type": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off"
     },
   },
 );
