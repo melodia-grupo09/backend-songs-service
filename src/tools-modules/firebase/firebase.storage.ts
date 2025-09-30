@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { app } from 'firebase-admin';
-import { Bucket } from '@google-cloud/storage';
+import { Bucket, File } from '@google-cloud/storage';
 
 @Injectable()
 export class FirebaseStorage {
@@ -8,5 +8,9 @@ export class FirebaseStorage {
 
   constructor(@Inject('FIREBASE_APP') firebaseApp: app.App) {
     this.bucket = firebaseApp.storage().bucket();
+  }
+
+  getFile(filePath: string): File {
+    return this.bucket.file(filePath);
   }
 }
