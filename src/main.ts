@@ -7,7 +7,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { MikroORM } from '@mikro-orm/postgresql';
+import { MikroORM } from '@mikro-orm/mongodb';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -52,6 +52,7 @@ function startSwaggerDocs(app: INestApplication) {
 async function waitForDatabaseAndMigrate(app: INestApplication) {
   const mikroORM: MikroORM = app.get(MikroORM);
   await mikroORM.checkConnection();
+  await mikroORM.schema.createSchema();
   await mikroORM.migrator.up();
 }
 

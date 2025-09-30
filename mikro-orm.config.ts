@@ -1,17 +1,19 @@
-import { Migrator } from '@mikro-orm/migrations';
-import { defineConfig, PostgreSqlDriver, Utils } from '@mikro-orm/postgresql';
+import { Migrator } from '@mikro-orm/migrations-mongodb';
+import { defineConfig, MongoDriver, Utils } from '@mikro-orm/mongodb';
 import { SeedManager } from '@mikro-orm/seeder';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 import 'dotenv/config';
 
 export default defineConfig({
-  driver: PostgreSqlDriver,
+  driver: MongoDriver,
   debug: true,
   autoJoinOneToOneOwner: false,
   highlighter: new SqlHighlighter(),
   entities: ['dist/**/*.entity.js'],
   entitiesTs: ['src/**/*.entity.ts'],
   extensions: [Migrator, SeedManager],
+  ensureIndexes: true,
+  implicitTransactions: true,
   seeder: {
     path: Utils.detectTsNode()
       ? 'src/database/seeders'
@@ -27,9 +29,5 @@ export default defineConfig({
     transactional: true,
     emit: 'ts',
   },
-  host: process.env.DATABASE_HOST,
-  port: parseInt(process.env.DATABASE_PORT!),
-  user: process.env.DATABASE_USER,
-  password: process.env.DATABASE_PASSWORD,
-  dbName: process.env.DATABASE_NAME,
+  clientUrl: process.env.DATABASE_URL
 });
