@@ -1,21 +1,20 @@
 services:
-  postgres:
-    image: postgres:17
+  mongo:
+    image: mongo:8
     restart: unless-stopped
-    ports:
-    - "5432:5432"
     environment:
-      POSTGRES_USER: ${DATABASE_USER}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_DB: ${DATABASE_NAME}
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: songs
+    ports:
+    - "27017:27017"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER}"]
+      test: ["CMD", "mongo", "--username", "user", "--password", "password", "--eval", "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
     volumes:
-    - postgres-data:/var/lib/postgresql/data
+    - mongo-data:/data/db
 
 volumes:
-  postgres-data:
+  mongo-data:

@@ -26,8 +26,8 @@ export default defineConfig({
     path: Utils.detectTsNode()
       ? 'src/database/migrations'
       : 'dist/src/database/migrations',
-    transactional: true,
+    transactional: false,
     emit: 'ts',
   },
-  clientUrl: process.env.DATABASE_URL
+  clientUrl: process.env.DATABASE_URL,
 });

@@ -1,4 +1,4 @@
-import { EntityRepository } from '@mikro-orm/postgresql';
+import { EntityRepository } from '@mikro-orm/mongodb';
 
 export class BaseRepository<
   Entity extends object,

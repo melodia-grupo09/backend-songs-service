@@ -3,10 +3,10 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 import 'tsconfig-paths/register';
-import { PostgreSqlDriver } from '@mikro-orm/postgresql';
+import { MongoDriver } from '@mikro-orm/mongodb';
 import { MIKRO_ORM_MODULE_OPTIONS } from '@mikro-orm/nestjs';
 import { AppModule } from 'src/app.module';
-import { MikroORM } from '@mikro-orm/core';
+import { MikroORM } from '@mikro-orm/mongodb';
 import assert from 'assert';
 import supertest from 'supertest';
 import { App } from 'supertest/types';
@@ -18,13 +18,9 @@ Before(async function (this: TestWorld) {
   })
     .overrideProvider(MIKRO_ORM_MODULE_OPTIONS)
     .useValue({
-      driver: PostgreSqlDriver,
+      driver: MongoDriver,
       debug: false,
-      host: process.env.TEST_DATABASE_HOST,
-      port: parseInt(process.env.TEST_DATABASE_PORT!, 10),
-      user: process.env.TEST_DATABASE_USER,
-      password: process.env.TEST_DATABASE_PASSWORD,
-      dbName: process.env.TEST_DATABASE_NAME,
+      clientUrl: process.env.DATABASE_URL,
       entities: ['src/**/*.entity.ts'],
     })
     .compile();
@@ -40,6 +36,7 @@ Before(async function (this: TestWorld) {
 
   await this.app.init();
   const orm = this.app.get(MikroORM);
+  await orm.checkConnection();
   const generator = orm.getSchemaGenerator();
   await generator.dropSchema();
   await generator.createSchema();

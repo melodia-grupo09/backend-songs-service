@@ -1,4 +1,4 @@
-import { Entity, EntityRepositoryType, Property } from '@mikro-orm/core';
+import { Entity, EntityRepositoryType, Index, Property } from '@mikro-orm/core';
 import { BaseEntity } from '../base.entity';
 import { SongRepository } from './song.repository';
 
@@ -7,6 +7,7 @@ export class Song extends BaseEntity<Song> {
   [EntityRepositoryType]: SongRepository;
 
   @Property({ nullable: false })
+  @Index()
   title: string;
 
   @Property({ nullable: false })
