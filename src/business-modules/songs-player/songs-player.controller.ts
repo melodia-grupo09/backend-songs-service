@@ -5,11 +5,11 @@ import { ApiParam, ApiProperty } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { GetSongStreamUseCase } from './use-cases/get-song-stream.use-case';
 
-@Controller('songs')
+@Controller('songs/player')
 export class SongsPlayerController {
   constructor(private readonly getSongStreamUseCase: GetSongStreamUseCase) {}
 
-  @Get('stream/:songId')
+  @Get('play/:songId')
   @ApiParam({
     name: 'songId',
     required: true,
