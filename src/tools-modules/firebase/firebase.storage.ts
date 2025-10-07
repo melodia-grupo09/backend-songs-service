@@ -13,4 +13,19 @@ export class FirebaseStorage {
   getFile(filePath: string): File {
     return this.bucket.file(filePath);
   }
+
+  async uploadFile(
+    filePath: string,
+    buffer: Buffer,
+    contentType: string,
+  ): Promise<void> {
+    const file = this.bucket.file(filePath);
+    await file
+      .save(buffer, {
+        metadata: {
+          contentType,
+        },
+      })
+      .then(() => file);
+  }
 }

@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import mikroOrmConfig from 'mikro-orm.config';
 import { SongsPlayerModule } from './business-modules/songs-player/songs-player.module';
+import { SongsManagerModule } from './business-modules/songs-manager/songs-manager.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { SongsPlayerModule } from './business-modules/songs-player/songs-player.
 
     // Business Modules
     SongsPlayerModule,
+    SongsManagerModule,
   ],
   controllers: [],
   providers: [],

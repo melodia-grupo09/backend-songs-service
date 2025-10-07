@@ -7,28 +7,35 @@ export class Song extends BaseEntity<Song> {
   [EntityRepositoryType]: SongRepository;
 
   @Property({ nullable: false })
-  @Index()
+  @Index({ type: 'fulltext' })
   title: string;
 
-  @Property({ nullable: false })
-  artist: string;
+  @Property({ nullable: false, type: 'array' })
+  artists: string[];
 
   @Property({ nullable: false })
   duration: number; // duration in seconds
 
   @Property({ nullable: false, hidden: true })
-  storagePath: string;
+  filePath: string;
+
+  @Property({ persist: false, hidden: true })
+  score?: number;
 
   constructor(
     title: string,
-    artist: string,
+    artists: string[],
     duration: number,
-    storagePath: string,
+    filePath: string,
   ) {
     super();
     this.title = title;
-    this.artist = artist;
+    this.artists = artists;
     this.duration = duration;
-    this.storagePath = storagePath;
+    this.filePath = filePath;
+  }
+
+  setFilePath(filePath: string) {
+    this.filePath = filePath;
   }
 }
