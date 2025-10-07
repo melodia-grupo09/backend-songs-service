@@ -6,7 +6,7 @@ import { SongRepository } from './song.repository';
 export class Song extends BaseEntity<Song> {
   [EntityRepositoryType]: SongRepository;
 
-  @Property({ nullable: false })
+  @Property({ nullable: false, type: 'text' })
   @Index({ type: 'fulltext' })
   title: string;
 
@@ -16,14 +16,11 @@ export class Song extends BaseEntity<Song> {
   @Property({ nullable: true })
   albumId: string | null;
 
-  @Property({ nullable: false })
+  @Property({ nullable: false, type: 'numeric' })
   duration: number; // duration in seconds
 
-  @Property({ nullable: false, hidden: true })
+  @Property({ nullable: false, hidden: true, type: 'text' })
   filePath: string;
-
-  @Property({ persist: false, hidden: true })
-  score?: number;
 
   constructor(
     title: string,

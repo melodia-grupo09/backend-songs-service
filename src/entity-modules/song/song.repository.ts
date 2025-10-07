@@ -7,14 +7,14 @@ export class SongRepository extends BaseRepository<Song> {
     limit: number,
     page: number,
   ): Promise<Song[]> {
-    const filter = { $fulltext: query };
-    const options = {
-      fields: ['*', { score: { $meta: 'textScore' } }],
-      limit,
-      offset: (page - 1) * limit,
-      orderBy: { score: { $meta: 'textScore' } },
-    };
-
-    return this.find(filter as any, options as any);
+    return this.find(
+      {
+        $fulltext: query,
+      },
+      {
+        limit,
+        offset: (page - 1) * limit,
+      },
+    );
   }
 }

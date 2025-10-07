@@ -4,6 +4,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  DefaultValuePipe,
   Get,
   ParseIntPipe,
   Post,
@@ -35,17 +36,21 @@ export class SongsManagerController {
   @ApiProperty({
     name: 'page',
     required: false,
+    default: 1,
     description: 'Page number for pagination',
   })
   @ApiProperty({
     name: 'limit',
     required: false,
+    default: 20,
     description: 'Number of results per page',
   })
   async searchSongs(
     @Query('query') query: string,
-    @Query('page', ParseIntPipe) page: number = 1,
-    @Query('limit', ParseIntPipe) limit: number = 20,
+    @Query('page', new DefaultValuePipe(1), new ParseIntPipe())
+    page: number,
+    @Query('limit', new DefaultValuePipe(20), new ParseIntPipe())
+    limit: number,
   ): Promise<SongDTO[]> {
     if (!query) {
       throw new BadRequestException('Query parameter is required');
