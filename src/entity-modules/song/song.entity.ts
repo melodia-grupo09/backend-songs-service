@@ -14,6 +14,9 @@ export class Song extends BaseEntity<Song> {
   artists: string[];
 
   @Property({ nullable: false })
+  albumId?: string;
+
+  @Property({ nullable: false })
   duration: number; // duration in seconds
 
   @Property({ nullable: false, hidden: true })
@@ -25,12 +28,14 @@ export class Song extends BaseEntity<Song> {
   constructor(
     title: string,
     artists: string[],
+    albumId: string,
     duration: number,
     filePath: string,
   ) {
     super();
     this.title = title;
     this.artists = artists;
+    this.albumId = albumId;
     this.duration = duration;
     this.filePath = filePath;
   }
