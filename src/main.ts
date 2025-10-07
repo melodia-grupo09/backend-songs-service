@@ -13,7 +13,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: new ConsoleLogger({
       logLevels: ['error', 'warn', 'log'],
-      prefix: '[Nest App]',
+      prefix: 'Songs Service',
     }),
   });
 
