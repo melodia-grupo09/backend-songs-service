@@ -36,7 +36,7 @@ export class UploadSongUseCase {
     const song = new Song(
       uploadSongDto.title,
       uploadSongDto.artists,
-      uploadSongDto.albumId,
+      uploadSongDto.albumId || null,
       convertedFile.duration,
       '',
     );

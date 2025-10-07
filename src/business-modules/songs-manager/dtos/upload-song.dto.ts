@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsString } from 'class-validator';
+import { IsArray, IsOptional, IsString } from 'class-validator';
 
 export class UploadSongDTO {
   @ApiProperty({
@@ -33,7 +33,9 @@ export class UploadSongDTO {
     type: 'string',
     description: 'Album ID',
     example: '123e4567-e89b-12d3-a456-426614174000',
+    required: false,
   })
+  @IsOptional()
   @IsString()
-  albumId: string;
+  albumId?: string | null;
 }

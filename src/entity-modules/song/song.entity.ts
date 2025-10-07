@@ -13,8 +13,8 @@ export class Song extends BaseEntity<Song> {
   @Property({ nullable: false, type: 'array' })
   artists: string[];
 
-  @Property({ nullable: false })
-  albumId?: string;
+  @Property({ nullable: true })
+  albumId: string | null;
 
   @Property({ nullable: false })
   duration: number; // duration in seconds
@@ -28,7 +28,7 @@ export class Song extends BaseEntity<Song> {
   constructor(
     title: string,
     artists: string[],
-    albumId: string,
+    albumId: string | null,
     duration: number,
     filePath: string,
   ) {
