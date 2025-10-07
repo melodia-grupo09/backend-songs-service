@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiProperty, ApiQuery } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
@@ -16,6 +17,7 @@ import { SearchSongsUseCase } from './use-cases/search-songs.use-case';
 import { SongDTO } from 'src/entity-modules/song/song.dto';
 import { UploadSongDTO } from './dtos/upload-song.dto';
 import { UploadSongUseCase } from './use-cases/upload-song.use-case';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('songs')
 export class SongsManagerController {
@@ -58,6 +60,7 @@ export class SongsManagerController {
   }
 
   @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
   @ApiBody({
     description: 'Upload a new song',
     required: true,

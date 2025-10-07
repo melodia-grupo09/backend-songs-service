@@ -19,7 +19,7 @@ export function toDTO<Entity extends BaseEntity, Dto extends object>(
   const plain = entity.toObject();
 
   const dtoInstance = plainToInstance(DtoClass, plain, {
-    enableImplicitConversion: false,
+    enableImplicitConversion: true,
     enableCircularCheck: true,
     exposeDefaultValues: true,
   });

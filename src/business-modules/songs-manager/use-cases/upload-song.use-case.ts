@@ -40,6 +40,7 @@ export class UploadSongUseCase {
       convertedFile.duration,
       '',
     );
+    await this.songRepository.persistAndFlush(song);
     const songId = song.id;
     const filePath = `songs/${songId}.ogg`;
     song.setFilePath(filePath);
@@ -49,7 +50,7 @@ export class UploadSongUseCase {
         convertedFile.buffer,
         'audio/ogg',
       ),
-      this.songRepository.persistAndFlush(song),
+      this.songRepository.flush(),
     ]);
     return song.toDTO(SongDTO);
   }
@@ -60,19 +61,47 @@ export class UploadSongUseCase {
     return new Promise((resolve, reject) => {
       const readableStream = Readable.from(file.buffer);
       const chunks: any[] = [];
+      let durationStr: string;
 
-      Ffmpeg(readableStream)
+      const command = Ffmpeg(readableStream)
+        .on('progress', (progress) => {
+          // progress.timemark es un string de la forma '00:01:23.45'
+          // Lo guardamos para calcular la duración cuando termine de procesar
+          if (progress.timemark) {
+            durationStr = progress.timemark;
+          }
+        })
         .toFormat('ogg')
         .on('error', (err) => {
-          reject(err);
+          reject(new Error(`FFMPEG Error: ${err.message}`));
         })
         .on('end', () => {
-          resolve({ buffer: Buffer.concat(chunks), duration: 0 });
-        })
-        .pipe()
-        .on('data', (chunk) => {
-          chunks.push(chunk);
+          const buffer = Buffer.concat(chunks);
+          resolve({
+            buffer,
+            duration: this.parseDurationToSeconds(durationStr),
+          });
         });
+
+      command.pipe().on('data', (chunk) => {
+        chunks.push(chunk);
+      });
     });
+  }
+
+  private parseDurationToSeconds(durationString: string): number {
+    if (!durationString || typeof durationString !== 'string') {
+      return 0;
+    }
+    const parts = durationString.split(':').map(parseFloat);
+    let seconds = 0;
+    if (parts.length === 3) {
+      seconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
+    } else if (parts.length === 2) {
+      seconds = parts[0] * 60 + parts[1];
+    } else if (parts.length === 1) {
+      seconds = parts[0];
+    }
+    return isNaN(seconds) ? 0 : seconds;
   }
 }

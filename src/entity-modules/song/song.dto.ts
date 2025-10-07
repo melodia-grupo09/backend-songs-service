@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { BaseEntityDTO } from '../base.dto';
+import { IsArray, IsNumber, IsString } from 'class-validator';
 
 export class SongDTO extends BaseEntityDTO {
   @ApiProperty({
@@ -7,19 +8,22 @@ export class SongDTO extends BaseEntityDTO {
     example: 'Imagine',
     description: 'Title of the song',
   })
+  @IsString()
   title: string;
 
   @ApiProperty({
     type: String,
     example: 'John Lennon',
-    description: 'Artist of the song',
+    description: 'Artists of the song',
   })
-  artist: string;
+  @IsArray()
+  artists: string[];
 
   @ApiProperty({
     type: Number,
     example: 183,
     description: 'Duration of the song in seconds',
   })
+  @IsNumber()
   duration: number;
 }

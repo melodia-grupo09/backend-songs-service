@@ -2,6 +2,7 @@ import {
   Entity,
   OptionalProps,
   PrimaryKey,
+  Property,
   SerializedPrimaryKey,
 } from '@mikro-orm/core';
 import { ClassCtor, toDTO } from 'src/utils/dto.utils';
@@ -20,6 +21,12 @@ export abstract class BaseEntity<
 
   @SerializedPrimaryKey()
   id!: string;
+
+  @Property({ onCreate: () => new Date() })
+  createdAt: Date = new Date();
+
+  @Property({ onUpdate: () => new Date() })
+  updatedAt: Date = new Date();
 
   toDTO<Dto extends object>(dtoClass: ClassCtor<Dto>): Dto {
     return toDTO(this, dtoClass);

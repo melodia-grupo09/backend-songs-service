@@ -23,6 +23,10 @@ ARG APP_VERSION
 # Establece la variable de entorno usando el valor del argumento
 ENV APP_VERSION=${APP_VERSION}
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ffmpeg && \
+    rm -rf /var/lib/apt/lists/*
+
 # Copy dependencies
 COPY --from=build /app/node_modules ./node_modules
 

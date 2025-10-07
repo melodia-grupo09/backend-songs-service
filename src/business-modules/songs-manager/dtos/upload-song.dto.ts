@@ -1,14 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsArray, IsOptional, IsString } from 'class-validator';
 
 export class UploadSongDTO {
-  @ApiProperty({
-    type: 'string',
-    format: 'binary',
-    description: 'The song file to upload (OGG format)',
-  })
-  file: Express.Multer.File;
-
   @ApiProperty({
     type: 'string',
     description: 'Title of the song',
@@ -25,6 +19,7 @@ export class UploadSongDTO {
       '223e4567-e89b-12d3-a456-426614174000',
     ],
   })
+  @Transform(({ value }) => (value as string).split(','))
   @IsArray()
   @IsString({ each: true })
   artists: string[];
