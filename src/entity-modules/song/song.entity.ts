@@ -15,8 +15,8 @@ export class Song extends BaseEntity<Song> {
   @Index()
   title: string;
 
-  @Property({ nullable: false, type: 'array' })
-  artists: string[];
+  @Property({ nullable: false, type: 'json' })
+  artists: { id: string; name: string }[];
 
   @Property({ nullable: true })
   albumId: string | null;
@@ -29,7 +29,7 @@ export class Song extends BaseEntity<Song> {
 
   constructor(
     title: string,
-    artists: string[],
+    artists: { id: string; name: string }[],
     albumId: string | null,
     duration: number,
     filePath: string,

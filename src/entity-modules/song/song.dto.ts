@@ -17,7 +17,7 @@ export class SongDTO extends BaseEntityDTO {
     description: 'Artists of the song',
   })
   @IsArray()
-  artists: string[];
+  artists: { id: string; name: string }[];
 
   @ApiProperty({
     type: Number,
