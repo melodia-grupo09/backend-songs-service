@@ -9,11 +9,12 @@ export class SongRepository extends BaseRepository<Song> {
   ): Promise<Song[]> {
     return this.find(
       {
-        $fulltext: query,
+        title: new RegExp(query, 'i'),
       },
       {
         limit,
         offset: (page - 1) * limit,
+        orderBy: { createdAt: 'ASC' },
       },
     );
   }

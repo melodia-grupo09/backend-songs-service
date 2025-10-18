@@ -1,8 +1,8 @@
-import { EntityRepository } from '@mikro-orm/mongodb';
+import { MongoEntityRepository } from '@mikro-orm/mongodb';
 
 export class BaseRepository<
   Entity extends object,
-> extends EntityRepository<Entity> {
+> extends MongoEntityRepository<Entity> {
   persist(entity: Entity): void {
     this.getEntityManager().persist(entity);
   }
