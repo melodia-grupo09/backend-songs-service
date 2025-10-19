@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { plainToInstance, Transform } from 'class-transformer';
 import { IsArray, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { ArtistDTO } from 'src/entity-modules/song/song.dto';
 
@@ -23,8 +23,22 @@ export class UploadSongDTO {
     ],
   })
   @IsArray()
+  @Transform(({ value }) => {
+    let artistsArray: object[] = [];
+    if (typeof value === 'string') {
+      try {
+        artistsArray = JSON.parse(value) as object[];
+      } catch {
+        return [];
+      }
+    } else if (Array.isArray(value)) {
+      artistsArray = value as object[];
+    }
+    return artistsArray.map((artistObject) => {
+      return plainToInstance(ArtistDTO, artistObject);
+    });
+  })
   @ValidateNested({ each: true })
-  @Type(() => ArtistDTO)
   artists: ArtistDTO[];
 
   @ApiProperty({
