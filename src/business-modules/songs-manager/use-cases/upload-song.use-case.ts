@@ -35,7 +35,7 @@ export class UploadSongUseCase {
 
     const song = new Song(
       uploadSongDto.title,
-      uploadSongDto.artists.map((artist) => ({ id: artist, name: artist })),
+      uploadSongDto.artists,
       uploadSongDto.albumId || null,
       convertedFile.duration,
       '',

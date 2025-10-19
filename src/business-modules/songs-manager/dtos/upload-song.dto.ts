@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsArray, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsArray, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { ArtistDTO } from 'src/entity-modules/song/song.dto';
 
 export class UploadSongDTO {
   @ApiProperty({
@@ -12,17 +13,19 @@ export class UploadSongDTO {
   title: string;
 
   @ApiProperty({
-    type: 'string',
-    description: 'Artists IDs',
+    type: [ArtistDTO],
+    description: 'List of artists associated with the song',
     example: [
-      '123e4567-e89b-12d3-a456-426614174000',
-      '223e4567-e89b-12d3-a456-426614174000',
+      {
+        id: '123e4567-e89b-12d3-a456-426614174000',
+        name: 'Artist Name',
+      },
     ],
   })
-  @Transform(({ value }) => (value as string).split(','))
   @IsArray()
-  @IsString({ each: true })
-  artists: string[];
+  @ValidateNested({ each: true })
+  @Type(() => ArtistDTO)
+  artists: ArtistDTO[];
 
   @ApiProperty({
     type: 'string',
