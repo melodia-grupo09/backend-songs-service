@@ -23,18 +23,19 @@ import {
   ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
-import type { Request, Response } from 'express';
 import { SearchSongsUseCase } from './use-cases/search-songs.use-case';
 import { SongDTO } from 'src/entity-modules/song/song.dto';
 import { UploadSongDTO } from './dtos/upload-song.dto';
 import { UploadSongUseCase } from './use-cases/upload-song.use-case';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { GetSongByIdUseCase } from './use-cases/get-song-by-id.use-case';
+import { GetRandomSongsUseCase } from './use-cases/get-random-songs.use-case';
 
 @Controller('songs')
 export class SongsManagerController {
   constructor(
     private readonly getSongByIdUseCase: GetSongByIdUseCase,
+    private readonly getRandomSongsUseCase: GetRandomSongsUseCase,
     private readonly searchSongsUseCase: SearchSongsUseCase,
     private readonly uploadSongUseCase: UploadSongUseCase,
   ) {}
@@ -90,6 +91,34 @@ export class SongsManagerController {
   })
   async getSongById(@Param('id') id: string): Promise<SongDTO> {
     return this.getSongByIdUseCase.execute(id);
+  }
+
+  @Get('random')
+  @HttpCode(HttpStatus.OK)
+  @ApiResponse({
+    status: 200,
+    description: 'Retrieve random songs.',
+    type: [SongDTO],
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Number of random songs to retrieve',
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Page number for pagination',
+    example: 1,
+  })
+  async getRandomSongs(
+    @Query('limit', new DefaultValuePipe(10), new ParseIntPipe())
+    limit: number,
+    @Query('page', new DefaultValuePipe(1), new ParseIntPipe())
+    page: number,
+  ): Promise<SongDTO[]> {
+    return this.getRandomSongsUseCase.execute(limit, page);
   }
 
   @Post('upload')
