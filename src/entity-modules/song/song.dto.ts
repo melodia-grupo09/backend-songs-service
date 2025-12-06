@@ -46,4 +46,11 @@ export class SongDTO extends BaseEntityDTO {
   })
   @IsNumber()
   duration: number;
+
+  @ApiProperty({
+    type: Boolean,
+    example: false,
+    description: 'Indicates if the song has an associated video',
+  })
+  hasVideo: boolean;
 }

@@ -31,6 +31,7 @@ export async function addVideoToSong(
         firebaseStorage.uploadFile(videoPath, file.buffer, mimeType),
       );
     }
+    song.setHasVideo(true);
     return uploadPromises;
   } catch (err) {
     throw new BadRequestException(

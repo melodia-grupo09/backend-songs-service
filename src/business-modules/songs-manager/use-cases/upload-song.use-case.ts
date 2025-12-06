@@ -62,7 +62,7 @@ export class UploadSongUseCase {
       uploadPromises.push(...promises);
     }
 
-    await Promise.all([...uploadPromises]);
+    await Promise.all([...uploadPromises, this.songRepository.flush()]);
     return song.toDTO(SongDTO);
   }
 

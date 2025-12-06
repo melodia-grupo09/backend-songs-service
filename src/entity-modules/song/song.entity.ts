@@ -24,16 +24,25 @@ export class Song extends BaseEntity<Song> {
   @Property({ nullable: false, type: 'numeric' })
   duration: number; // duration in seconds
 
+  @Property({ type: 'boolean', default: false })
+  hasVideo: boolean = false;
+
   constructor(
     title: string,
     artists: { id: string; name: string }[],
     albumId: string | null,
     duration: number,
+    hasVideo: boolean = false,
   ) {
     super();
     this.title = title;
     this.artists = artists;
     this.albumId = albumId;
     this.duration = duration;
+    this.hasVideo = hasVideo;
+  }
+
+  setHasVideo(hasVideo: boolean) {
+    this.hasVideo = hasVideo;
   }
 }
