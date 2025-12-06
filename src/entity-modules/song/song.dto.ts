@@ -35,81 +35,6 @@ export class ArtistDTO {
   @IsString()
   name: string;
 }
-export class SongDTO extends BaseEntityDTO {
-  @ApiProperty({
-    type: String,
-    example: 'Imagine',
-    description: 'Title of the song',
-  })
-  @IsString()
-  title: string;
-
-  @ApiProperty({
-    type: [Object],
-    example: '[{id: 3, name: "John Lennon"}]',
-    description: 'Artists of the song',
-  })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => ArtistDTO)
-  artists: ArtistDTO[];
-
-  @ApiProperty({
-    type: Number,
-    example: 183,
-    description: 'Duration of the song in seconds',
-  })
-  @IsNumber()
-  duration: number;
-
-  @ApiProperty({
-    enum: ['scheduled', 'published'],
-    example: 'published',
-  })
-  @IsEnum(['scheduled', 'published'])
-  status: SongStatus;
-
-  @ApiProperty({
-    type: String,
-    format: 'date-time',
-    required: false,
-    nullable: true,
-  })
-  @IsOptional()
-  @IsDateString()
-  programmedAt?: string | null;
-
-  @ApiProperty({ type: Boolean, example: false })
-  @IsBoolean()
-  hasVideo: boolean;
-
-  @ApiProperty({
-    enum: [
-      'Bloqueado-admin',
-      'No-disponible-region',
-      'Programado',
-      'Publicado',
-    ],
-  })
-  @IsEnum([
-    'Bloqueado-admin',
-    'No-disponible-region',
-    'Programado',
-    'Publicado',
-  ])
-  effectiveStatus: CatalogEffectiveStatus;
-
-  @ApiProperty({ type: () => SongAvailabilityDTO })
-  @ValidateNested()
-  @Type(() => SongAvailabilityDTO)
-  availability: SongAvailabilityDTO;
-
-  @ApiProperty({ type: () => AuditEntryDTO, isArray: true })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => AuditEntryDTO)
-  auditLog: AuditEntryDTO[];
-}
 
 export class AvailabilityRegionDTO {
   @ApiProperty({ example: 'ar' })
@@ -214,4 +139,80 @@ export class AuditEntryDTO {
     'Publicado',
   ])
   newState?: CatalogEffectiveStatus;
+}
+
+export class SongDTO extends BaseEntityDTO {
+  @ApiProperty({
+    type: String,
+    example: 'Imagine',
+    description: 'Title of the song',
+  })
+  @IsString()
+  title: string;
+
+  @ApiProperty({
+    type: [Object],
+    example: '[{id: 3, name: "John Lennon"}]',
+    description: 'Artists of the song',
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ArtistDTO)
+  artists: ArtistDTO[];
+
+  @ApiProperty({
+    type: Number,
+    example: 183,
+    description: 'Duration of the song in seconds',
+  })
+  @IsNumber()
+  duration: number;
+
+  @ApiProperty({
+    enum: ['scheduled', 'published'],
+    example: 'published',
+  })
+  @IsEnum(['scheduled', 'published'])
+  status: SongStatus;
+
+  @ApiProperty({
+    type: String,
+    format: 'date-time',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsDateString()
+  programmedAt?: string | null;
+
+  @ApiProperty({ type: Boolean, example: false })
+  @IsBoolean()
+  hasVideo: boolean;
+
+  @ApiProperty({
+    enum: [
+      'Bloqueado-admin',
+      'No-disponible-region',
+      'Programado',
+      'Publicado',
+    ],
+  })
+  @IsEnum([
+    'Bloqueado-admin',
+    'No-disponible-region',
+    'Programado',
+    'Publicado',
+  ])
+  effectiveStatus: CatalogEffectiveStatus;
+
+  @ApiProperty({ type: () => SongAvailabilityDTO })
+  @ValidateNested()
+  @Type(() => SongAvailabilityDTO)
+  availability: SongAvailabilityDTO;
+
+  @ApiProperty({ type: () => AuditEntryDTO, isArray: true })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AuditEntryDTO)
+  auditLog: AuditEntryDTO[];
 }
