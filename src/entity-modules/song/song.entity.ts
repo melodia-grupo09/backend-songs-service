@@ -14,7 +14,7 @@ import {
   isRegionAdminBlocked as utilIsRegionAdminBlocked,
   isRegionAvailable,
 } from 'src/utils/song-availability.util';
-import {
+import type {
   AdminBlockMetadata,
   AuditEntry,
   CatalogEffectiveStatus,

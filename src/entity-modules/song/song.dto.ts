@@ -11,7 +11,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import {
+import type {
   AvailabilityStatus,
   BlockReasonCode,
   CatalogEffectiveStatus,
