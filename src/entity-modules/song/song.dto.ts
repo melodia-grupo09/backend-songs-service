@@ -1,7 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { BaseEntityDTO } from '../base.dto';
-import { IsArray, IsNumber, IsString, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsDateString,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
+import {
+  AvailabilityStatus,
+  BlockReasonCode,
+  CatalogEffectiveStatus,
+  SongStatus,
+} from './song.types';
 
 export class ArtistDTO {
   @ApiProperty({
@@ -48,9 +63,155 @@ export class SongDTO extends BaseEntityDTO {
   duration: number;
 
   @ApiProperty({
-    type: Boolean,
-    example: false,
-    description: 'Indicates if the song has an associated video',
+    enum: ['scheduled', 'published'],
+    example: 'published',
   })
+  @IsEnum(['scheduled', 'published'])
+  status: SongStatus;
+
+  @ApiProperty({
+    type: String,
+    format: 'date-time',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsDateString()
+  programmedAt?: string | null;
+
+  @ApiProperty({ type: Boolean, example: false })
+  @IsBoolean()
   hasVideo: boolean;
+
+  @ApiProperty({
+    enum: [
+      'Bloqueado-admin',
+      'No-disponible-region',
+      'Programado',
+      'Publicado',
+    ],
+  })
+  @IsEnum([
+    'Bloqueado-admin',
+    'No-disponible-region',
+    'Programado',
+    'Publicado',
+  ])
+  effectiveStatus: CatalogEffectiveStatus;
+
+  @ApiProperty({ type: () => SongAvailabilityDTO })
+  @ValidateNested()
+  @Type(() => SongAvailabilityDTO)
+  availability: SongAvailabilityDTO;
+
+  @ApiProperty({ type: () => AuditEntryDTO, isArray: true })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AuditEntryDTO)
+  auditLog: AuditEntryDTO[];
+}
+
+export class AvailabilityRegionDTO {
+  @ApiProperty({ example: 'ar' })
+  @IsString()
+  code: string;
+
+  @ApiProperty({ type: Boolean })
+  @IsBoolean()
+  allowed: boolean;
+
+  @ApiProperty({
+    enum: ['published', 'scheduled', 'region-blocked', 'admin-blocked'],
+  })
+  @IsEnum(['published', 'scheduled', 'region-blocked', 'admin-blocked'])
+  status: AvailabilityStatus | 'admin-blocked';
+}
+
+export class SongAvailabilityDTO {
+  @ApiProperty({ example: 'global-allow' })
+  @IsString()
+  policy: string;
+
+  @ApiProperty({ type: () => AvailabilityRegionDTO, isArray: true })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AvailabilityRegionDTO)
+  regions: AvailabilityRegionDTO[];
+}
+
+export class AuditEntryDTO {
+  @ApiProperty()
+  @IsString()
+  id: string;
+
+  @ApiProperty()
+  @IsDateString()
+  timestamp: string;
+
+  @ApiProperty()
+  @IsString()
+  action: string;
+
+  @ApiProperty()
+  @IsString()
+  actor: string;
+
+  @ApiProperty()
+  @IsString()
+  details: string;
+
+  @ApiProperty({ enum: ['global', 'regions'], required: false })
+  @IsOptional()
+  @IsEnum(['global', 'regions'])
+  scope?: 'global' | 'regions';
+
+  @ApiProperty({ type: [String], required: false })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  regions?: string[];
+
+  @ApiProperty({
+    enum: ['legal', 'copyright', 'quality', 'artist-request', 'policy'],
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(['legal', 'copyright', 'quality', 'artist-request', 'policy'])
+  reasonCode?: BlockReasonCode;
+
+  @ApiProperty({
+    enum: [
+      'Bloqueado-admin',
+      'No-disponible-region',
+      'Programado',
+      'Publicado',
+    ],
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum([
+    'Bloqueado-admin',
+    'No-disponible-region',
+    'Programado',
+    'Publicado',
+  ])
+  previousState?: CatalogEffectiveStatus;
+
+  @ApiProperty({
+    enum: [
+      'Bloqueado-admin',
+      'No-disponible-region',
+      'Programado',
+      'Publicado',
+    ],
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum([
+    'Bloqueado-admin',
+    'No-disponible-region',
+    'Programado',
+    'Publicado',
+  ])
+  newState?: CatalogEffectiveStatus;
 }
