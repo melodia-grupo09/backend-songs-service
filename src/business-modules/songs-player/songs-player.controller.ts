@@ -28,8 +28,8 @@ export class SongsPlayerController {
   async streamSong(
     @Param('songId') songId: string,
     @Req() req: Request,
-    @Query('region') region?: string,
     @Res() res: Response,
+    @Query('region') region?: string,
   ) {
     const range = req.headers.range;
     const streamDetails = await this.getSongStreamUseCase.execute(
@@ -55,8 +55,8 @@ export class SongsPlayerController {
     @Param('songId') songId: string,
     @Param('filename') filename: string,
     @Req() req: Request,
-    @Query('region') region?: string,
     @Res() res: Response,
+    @Query('region') region?: string,
   ) {
     const range = req.headers.range;
 
