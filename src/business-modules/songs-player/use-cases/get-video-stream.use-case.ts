@@ -1,22 +1,15 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { FirebaseStorage } from "src/tools-modules/firebase/firebase.storage";
-import { Readable } from "stream";
-
-export interface StreamDetails {
-  stream: Readable;
-  contentType: string;
-  contentLength: number;
-  contentRange?: string;
-}
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { FirebaseStorage } from 'src/tools-modules/firebase/firebase.storage';
+import { StreamDetails } from '../interfaces/stream';
 
 @Injectable()
 export class GetVideoStreamUseCase {
-  constructor(private readonly firebaseStorage: FirebaseStorage) { }
+  constructor(private readonly firebaseStorage: FirebaseStorage) {}
 
   async execute(
     songId: string,
     filename: string,
-    range?: string
+    range?: string,
   ): Promise<StreamDetails> {
     try {
       // HLS requiere buscar el archivo específico (.m3u8 o .ts) dentro de la carpeta del video
@@ -25,7 +18,9 @@ export class GetVideoStreamUseCase {
 
       const [exists] = await file.exists();
       if (!exists) {
-        throw new NotFoundException(`File ${filename} not found for song ${songId}`);
+        throw new NotFoundException(
+          `File ${filename} not found for song ${songId}`,
+        );
       }
 
       const [metadata] = await file.getMetadata();
@@ -40,7 +35,7 @@ export class GetVideoStreamUseCase {
       }
 
       // Lógica de Rango (Range Requests)
-      // Aunque HLS suele pedir archivos completos, soportar range es buena práctica 
+      // Aunque HLS suele pedir archivos completos, soportar range es buena práctica
       if (range) {
         const parts = range.replace(/bytes=/, '').split('-');
         const start = parseInt(parts[0], 10);

@@ -40,7 +40,7 @@ export class SongsManagerController {
     private readonly searchSongsUseCase: SearchSongsUseCase,
     private readonly uploadSongUseCase: UploadSongUseCase,
     private readonly addVideoToSongUseCase: AddVideoToSongUseCase,
-  ) { }
+  ) {}
 
   @Get('search')
   @ApiQuery({
@@ -150,7 +150,6 @@ export class SongsManagerController {
   ) {
     return this.uploadSongUseCase.execute(body, file, videoFile);
   }
-
 
   @Post('video/:songId')
   @UseInterceptors(FileInterceptor('videoFile'))

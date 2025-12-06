@@ -55,4 +55,5 @@ async function waitForDatabaseAndMigrate(app: INestApplication) {
   await mikroORM.migrator.up();
 }
 
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 bootstrap();

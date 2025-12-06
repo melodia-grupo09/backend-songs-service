@@ -13,7 +13,7 @@ export class UploadSongUseCase {
   constructor(
     private readonly songRepository: SongRepository,
     private readonly firebaseStorage: FirebaseStorage,
-  ) { }
+  ) {}
 
   async execute(
     uploadSongDto: UploadSongDTO,
@@ -33,7 +33,6 @@ export class UploadSongUseCase {
       throw new BadRequestException('Error converting file to OGG format');
     }
 
-
     const song = new Song(
       uploadSongDto.title,
       uploadSongDto.artists,
@@ -47,11 +46,19 @@ export class UploadSongUseCase {
 
     const audioPath = `songs/${songId}.ogg`;
     uploadPromises.push(
-      this.firebaseStorage.uploadFile(audioPath, convertedAudio.buffer, 'audio/ogg'),
+      this.firebaseStorage.uploadFile(
+        audioPath,
+        convertedAudio.buffer,
+        'audio/ogg',
+      ),
     );
 
     if (videoFile !== undefined) {
-      const promises = await addVideoToSong(song, videoFile, this.firebaseStorage);
+      const promises = await addVideoToSong(
+        song,
+        videoFile,
+        this.firebaseStorage,
+      );
       uploadPromises.push(...promises);
     }
 

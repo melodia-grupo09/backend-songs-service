@@ -48,8 +48,6 @@ $ npm run start:prod
 
 ```bash
 # unit tests
-$ npm run test
-
 # e2e tests (Cucumber)
 $ npm run test:e2e
 

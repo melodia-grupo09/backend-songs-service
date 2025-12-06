@@ -1,14 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { FirebaseStorage } from 'src/tools-modules/firebase/firebase.storage';
 import { File } from '@google-cloud/storage';
-import { Readable } from 'stream';
-
-export interface StreamDetails {
-  stream: Readable;
-  contentType: string;
-  contentLength: number;
-  contentRange?: string;
-}
+import { StreamDetails } from '../interfaces/stream';
 
 @Injectable()
 export class GetSongStreamUseCase {

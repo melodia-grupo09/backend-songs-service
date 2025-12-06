@@ -5,13 +5,14 @@ import { ApiParam, ApiProperty } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { GetSongStreamUseCase } from './use-cases/get-song-stream.use-case';
 import { GetVideoStreamUseCase } from './use-cases/get-video-stream.use-case';
+import { StreamDetails } from './interfaces/stream';
 
 @Controller('songs/player')
 export class SongsPlayerController {
   constructor(
     private readonly getSongStreamUseCase: GetSongStreamUseCase,
     private readonly getVideoStreamUseCase: GetVideoStreamUseCase,
-  ) { }
+  ) {}
 
   @Get('play/:songId')
   @ApiParam({
@@ -65,7 +66,7 @@ export class SongsPlayerController {
     this.handleStreamResponse(res, streamDetails);
   }
 
-  private handleStreamResponse(res: Response, streamDetails: any) {
+  private handleStreamResponse(res: Response, streamDetails: StreamDetails) {
     if (streamDetails.contentRange) {
       res.writeHead(206, {
         'Content-Range': streamDetails.contentRange,
