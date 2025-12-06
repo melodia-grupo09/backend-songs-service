@@ -1,16 +1,35 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { SongRepository } from 'src/entity-modules/song/song.repository';
 import { FirebaseStorage } from 'src/tools-modules/firebase/firebase.storage';
-import { StreamDetails } from '../interfaces/stream';
+import { StreamDetails } from '../types/stream-details.type';
 
 @Injectable()
 export class GetVideoStreamUseCase {
-  constructor(private readonly firebaseStorage: FirebaseStorage) {}
+  constructor(
+    private readonly firebaseStorage: FirebaseStorage,
+    private readonly songRepository: SongRepository,
+  ) {}
 
   async execute(
     songId: string,
     filename: string,
     range?: string,
+    region?: string,
   ): Promise<StreamDetails> {
+    const song = await this.songRepository.findOne({ id: songId });
+    if (!song) {
+      throw new NotFoundException('Song not found');
+    }
+    if (!song.isAvailableInRegion(region ?? null)) {
+      throw new ForbiddenException('Song is not available in this region');
+    }
+    if (!song.hasVideo) {
+      throw new NotFoundException('Video resource not found');
+    }
     try {
       // HLS requiere buscar el archivo específico (.m3u8 o .ts) dentro de la carpeta del video
       const filePath = `songs/${songId}/video/${filename}`;
@@ -61,7 +80,7 @@ export class GetVideoStreamUseCase {
       }
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      if (error.code === 404) {
+      if (error?.code === 404) {
         throw new NotFoundException('Video resource not found');
       }
       throw error;

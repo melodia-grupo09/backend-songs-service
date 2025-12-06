@@ -1,20 +1,39 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { SongRepository } from 'src/entity-modules/song/song.repository';
 import { FirebaseStorage } from 'src/tools-modules/firebase/firebase.storage';
 import { File } from '@google-cloud/storage';
-import { StreamDetails } from '../interfaces/stream';
+import { StreamDetails } from '../types/stream-details.type';
 
 @Injectable()
 export class GetSongStreamUseCase {
-  constructor(private readonly firebaseStorage: FirebaseStorage) {}
+  constructor(
+    private readonly firebaseStorage: FirebaseStorage,
+    private readonly songRepository: SongRepository,
+  ) {}
 
-  async execute(songId: string, range?: string): Promise<StreamDetails> {
+  async execute(
+    songId: string,
+    range?: string,
+    region?: string,
+  ): Promise<StreamDetails> {
+    const song = await this.songRepository.findOne({ id: songId });
+    if (!song) {
+      throw new NotFoundException('Song not found');
+    }
+    if (!song.isAvailableInRegion(region ?? null)) {
+      throw new ForbiddenException('Song is not available in this region');
+    }
     try {
       const songFile: File = this.firebaseStorage.getFile(
         `songs/${songId}.ogg`,
       );
 
       const [metadata] = await songFile.getMetadata();
-      const fileSize = metadata.size as number;
+      const fileSize = parseInt(metadata.size as string, 10);
       const contentType = metadata.contentType || 'audio/ogg';
 
       // CASO 1: Se solicita un fragmento de la canción (streaming)
@@ -45,7 +64,7 @@ export class GetSongStreamUseCase {
         };
       }
     } catch (error) {
-      if (error.code !== undefined && error.code === 404) {
+      if (error?.code === 404) {
         throw new NotFoundException('Song not found');
       }
       throw error;
