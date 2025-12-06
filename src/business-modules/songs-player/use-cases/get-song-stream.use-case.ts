@@ -1,16 +1,13 @@
-// src/use-cases/get-song-stream.use-case.ts
-
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { FirebaseStorage } from 'src/tools-modules/firebase/firebase.storage';
 import { File } from '@google-cloud/storage';
 import { Readable } from 'stream';
 
-// Definimos la estructura de lo que devolverá el caso de uso
 export interface StreamDetails {
   stream: Readable;
   contentType: string;
   contentLength: number;
-  contentRange?: string; // Opcional, solo para streams parciales
+  contentRange?: string;
 }
 
 @Injectable()

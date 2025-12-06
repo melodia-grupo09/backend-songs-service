@@ -4,10 +4,14 @@ import { Controller, Get, Param, Req, Res } from '@nestjs/common';
 import { ApiParam, ApiProperty } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { GetSongStreamUseCase } from './use-cases/get-song-stream.use-case';
+import { GetVideoStreamUseCase } from './use-cases/get-video-stream.use-case';
 
 @Controller('songs/player')
 export class SongsPlayerController {
-  constructor(private readonly getSongStreamUseCase: GetSongStreamUseCase) {}
+  constructor(
+    private readonly getSongStreamUseCase: GetSongStreamUseCase,
+    private readonly getVideoStreamUseCase: GetVideoStreamUseCase,
+  ) { }
 
   @Get('play/:songId')
   @ApiParam({
@@ -30,8 +34,38 @@ export class SongsPlayerController {
       songId,
       range,
     );
+    this.handleStreamResponse(res, streamDetails);
+  }
 
-    // Si el use-case devuelve un 'contentRange', es una petición parcial (206)
+  @Get('video/:songId/:filename')
+  @ApiParam({
+    name: 'songId',
+    required: true,
+    description: 'ID of the song',
+  })
+  @ApiParam({
+    name: 'filename',
+    required: true,
+    description: 'Specific HLS file (playlist.m3u8 or segments .ts)',
+  })
+  async streamVideo(
+    @Param('songId') songId: string,
+    @Param('filename') filename: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const range = req.headers.range;
+
+    const streamDetails = await this.getVideoStreamUseCase.execute(
+      songId,
+      filename,
+      range,
+    );
+
+    this.handleStreamResponse(res, streamDetails);
+  }
+
+  private handleStreamResponse(res: Response, streamDetails: any) {
     if (streamDetails.contentRange) {
       res.writeHead(206, {
         'Content-Range': streamDetails.contentRange,
@@ -39,15 +73,15 @@ export class SongsPlayerController {
         'Content-Length': streamDetails.contentLength,
         'Content-Type': streamDetails.contentType,
       });
-    }
-    // Si no, es una petición completa (200)
-    else {
+    } else {
       res.writeHead(200, {
         'Content-Length': streamDetails.contentLength,
         'Content-Type': streamDetails.contentType,
+        'Cache-Control': streamDetails.contentType.includes('mpegURL')
+          ? 'no-cache'
+          : 'public, max-age=31536000',
       });
     }
-
     streamDetails.stream.pipe(res);
   }
 }

@@ -6,6 +6,7 @@ import { SearchSongsUseCase } from './use-cases/search-songs.use-case';
 import { UploadSongUseCase } from './use-cases/upload-song.use-case';
 import { GetSongByIdUseCase } from './use-cases/get-song-by-id.use-case';
 import { GetRandomSongsUseCase } from './use-cases/get-random-songs.use-case';
+import { AddVideoToSongUseCase } from './use-cases/add-video-to-song.use-case';
 
 @Module({
   imports: [SongModule, FirebaseModule],
@@ -16,6 +17,7 @@ import { GetRandomSongsUseCase } from './use-cases/get-random-songs.use-case';
     GetRandomSongsUseCase,
     SearchSongsUseCase,
     UploadSongUseCase,
+    AddVideoToSongUseCase,
   ],
   exports: [],
 })

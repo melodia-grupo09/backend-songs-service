@@ -30,6 +30,7 @@ import { UploadSongUseCase } from './use-cases/upload-song.use-case';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { GetSongByIdUseCase } from './use-cases/get-song-by-id.use-case';
 import { GetRandomSongsUseCase } from './use-cases/get-random-songs.use-case';
+import { AddVideoToSongUseCase } from './use-cases/add-video-to-song.use-case';
 
 @Controller('songs')
 export class SongsManagerController {
@@ -38,7 +39,8 @@ export class SongsManagerController {
     private readonly getRandomSongsUseCase: GetRandomSongsUseCase,
     private readonly searchSongsUseCase: SearchSongsUseCase,
     private readonly uploadSongUseCase: UploadSongUseCase,
-  ) {}
+    private readonly addVideoToSongUseCase: AddVideoToSongUseCase,
+  ) { }
 
   @Get('search')
   @ApiQuery({
@@ -122,7 +124,7 @@ export class SongsManagerController {
   }
 
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file'), FileInterceptor('videoFile'))
   @ApiBody({
     description: 'Upload a new song',
     required: true,
@@ -134,11 +136,40 @@ export class SongsManagerController {
     format: 'binary',
     description: 'The song file to upload',
   })
+  @ApiProperty({
+    name: 'videoFile',
+    type: 'string',
+    format: 'binary',
+    description: 'The optional video file to upload',
+  })
   @ApiConsumes('multipart/form-data')
   async uploadSong(
     @Body() body: UploadSongDTO,
     @UploadedFile() file: Express.Multer.File,
+    @UploadedFile('videoFile') videoFile?: Express.Multer.File,
   ) {
-    return this.uploadSongUseCase.execute(body, file);
+    return this.uploadSongUseCase.execute(body, file, videoFile);
+  }
+
+
+  @Post('video/:songId')
+  @UseInterceptors(FileInterceptor('videoFile'))
+  @ApiParam({
+    name: 'songId',
+    description: 'ID of the song to which the video will be added',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiProperty({
+    name: 'videoFile',
+    type: 'string',
+    format: 'binary',
+    description: 'The optional video file to upload',
+  })
+  @ApiConsumes('multipart/form-data')
+  async addVideoToSong(
+    @Param('songId') songId: string,
+    @UploadedFile('videoFile') videoFile: Express.Multer.File,
+  ) {
+    return this.addVideoToSongUseCase.execute(songId, videoFile);
   }
 }
