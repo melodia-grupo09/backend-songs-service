@@ -1,11 +1,11 @@
 // src/songs/songs.controller.ts
 
-import { Controller, Get, Param, Req, Res } from '@nestjs/common';
+import { Controller, Get, Param, Query, Req, Res } from '@nestjs/common';
 import { ApiParam, ApiProperty } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { GetSongStreamUseCase } from './use-cases/get-song-stream.use-case';
 import { GetVideoStreamUseCase } from './use-cases/get-video-stream.use-case';
-import { StreamDetails } from './interfaces/stream';
+import { StreamDetails } from './types/stream-details.type';
 
 @Controller('songs/player')
 export class SongsPlayerController {
@@ -28,12 +28,14 @@ export class SongsPlayerController {
   async streamSong(
     @Param('songId') songId: string,
     @Req() req: Request,
+    @Query('region') region?: string,
     @Res() res: Response,
   ) {
     const range = req.headers.range;
     const streamDetails = await this.getSongStreamUseCase.execute(
       songId,
       range,
+      region,
     );
     this.handleStreamResponse(res, streamDetails);
   }
@@ -53,6 +55,7 @@ export class SongsPlayerController {
     @Param('songId') songId: string,
     @Param('filename') filename: string,
     @Req() req: Request,
+    @Query('region') region?: string,
     @Res() res: Response,
   ) {
     const range = req.headers.range;
@@ -61,6 +64,7 @@ export class SongsPlayerController {
       songId,
       filename,
       range,
+      region,
     );
 
     this.handleStreamResponse(res, streamDetails);
