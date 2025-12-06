@@ -24,7 +24,8 @@ export class AddVideoToSongUseCase {
       videoFile,
       this.firebaseStorage,
     );
-    await Promise.all([...uploadPromises, this.songRepository.flush()]);
+    await Promise.all(uploadPromises);
+    await this.songRepository.flush();
     return song.toDTO(SongDTO);
   }
 }
