@@ -167,7 +167,7 @@ export class SongsManagerController {
   @ApiConsumes('multipart/form-data')
   async addVideoToSong(
     @Param('songId') songId: string,
-    @UploadedFile('videoFile') videoFile: Express.Multer.File,
+    @UploadedFile() videoFile: Express.Multer.File,
   ) {
     return this.addVideoToSongUseCase.execute(songId, videoFile);
   }
