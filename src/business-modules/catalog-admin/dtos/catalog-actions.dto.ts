@@ -6,7 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { BlockReasonCode } from 'src/entity-modules/song/song.types';
+import type { BlockReasonCode } from 'src/entity-modules/song/song.types';
 
 export class UpdateAvailabilityDto {
   @ApiProperty({ enum: ['global', 'regions'], required: false })
