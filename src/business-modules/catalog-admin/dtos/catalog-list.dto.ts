@@ -9,7 +9,7 @@ import {
   Min,
 } from 'class-validator';
 import { AvailabilityRegionDTO } from 'src/entity-modules/song/song.dto';
-import { CatalogEffectiveStatus } from 'src/entity-modules/song/song.types';
+import type { CatalogEffectiveStatus } from 'src/entity-modules/song/song.types';
 
 export class CatalogListQueryDto {
   @ApiProperty({ required: false })
