@@ -19,6 +19,7 @@
     "test:e2e": "cucumber-js --tags \"not @wip\" --format summary --format progress",
     "test:e2e:cov": "nyc npm run test:e2e",
     "test:cov": "jest --coverage",
+    "test:cov:all": "rm -rf .nyc_output coverage && npm run test:e2e:cov && npm run test:cov && cp coverage/coverage-final.json .nyc_output/unit-coverage.json && nyc report --reporter=html --reporter=text --reporter=lcov",
     "mikro-orm": "ts-node -r tsconfig-paths/register ./node_modules/.bin/mikro-orm",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "prepare": "husky"
@@ -93,11 +94,9 @@
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "coverageProvider": "v8"
   },
   "nyc": {
     "extends": "@istanbuljs/nyc-config-typescript",
