@@ -3,16 +3,15 @@ import { FirebaseStorage } from 'src/tools-modules/firebase/firebase.storage';
 import { SongDTO } from 'src/entity-modules/song/song.dto';
 import { UploadSongDTO } from '../dtos/upload-song.dto';
 import { SongRepository } from 'src/entity-modules/song/song.repository';
-import { Readable } from 'stream';
-import Ffmpeg from 'fluent-ffmpeg';
 import { Song } from 'src/entity-modules/song/song.entity';
-import { addVideoToSong } from '../utils/video-converter';
+import { MediaConverterService } from 'src/tools-modules/media-converter/media-converter.service';
 
 @Injectable()
 export class UploadSongUseCase {
   constructor(
     private readonly songRepository: SongRepository,
     private readonly firebaseStorage: FirebaseStorage,
+    private readonly mediaConverterService: MediaConverterService,
   ) {}
 
   async execute(
@@ -28,7 +27,8 @@ export class UploadSongUseCase {
     let convertedAudio: { buffer: Buffer; duration: number };
 
     try {
-      convertedAudio = await this.convertFileToOGG(songFile);
+      convertedAudio =
+        await this.mediaConverterService.convertAudioToOgg(songFile);
     } catch {
       throw new BadRequestException('Error converting file to OGG format');
     }
@@ -54,65 +54,22 @@ export class UploadSongUseCase {
     );
 
     if (videoFile !== undefined) {
-      const promises = await addVideoToSong(
-        song,
-        videoFile,
-        this.firebaseStorage,
-      );
-      uploadPromises.push(...promises);
+      const hlsFiles =
+        await this.mediaConverterService.convertVideoToHLS(videoFile);
+      for (const file of hlsFiles) {
+        const videoPath = `songs/${song.id}/video/${file.fileName}`;
+        let mimeType = 'video/mp2t';
+        if (file.fileName.endsWith('.m3u8')) {
+          mimeType = 'application/x-mpegURL';
+        }
+        uploadPromises.push(
+          this.firebaseStorage.uploadFile(videoPath, file.buffer, mimeType),
+        );
+      }
+      song.setHasVideo(true);
     }
 
     await Promise.all([...uploadPromises, this.songRepository.flush()]);
     return song.toDTO(SongDTO);
-  }
-
-  private convertFileToOGG(
-    file: Express.Multer.File,
-  ): Promise<{ buffer: Buffer; duration: number }> {
-    return new Promise((resolve, reject) => {
-      const readableStream = Readable.from(file.buffer);
-      const chunks: any[] = [];
-      let durationStr: string;
-
-      const command = Ffmpeg(readableStream)
-        .on('progress', (progress) => {
-          // progress.timemark es un string de la forma '00:01:23.45'
-          // Lo guardamos para calcular la duración cuando termine de procesar
-          if (progress.timemark) {
-            durationStr = progress.timemark;
-          }
-        })
-        .toFormat('ogg')
-        .on('error', (err) => {
-          reject(new Error(`FFMPEG Error: ${err.message}`));
-        })
-        .on('end', () => {
-          const buffer = Buffer.concat(chunks);
-          resolve({
-            buffer,
-            duration: this.parseDurationToSeconds(durationStr),
-          });
-        });
-
-      command.pipe().on('data', (chunk) => {
-        chunks.push(chunk);
-      });
-    });
-  }
-
-  private parseDurationToSeconds(durationString: string): number {
-    if (!durationString || typeof durationString !== 'string') {
-      return 0;
-    }
-    const parts = durationString.split(':').map(parseFloat);
-    let seconds = 0;
-    if (parts.length === 3) {
-      seconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
-    } else if (parts.length === 2) {
-      seconds = parts[0] * 60 + parts[1];
-    } else if (parts.length === 1) {
-      seconds = parts[0];
-    }
-    return isNaN(seconds) ? 0 : seconds;
   }
 }

@@ -1,5 +1,3 @@
-// src/songs/songs.controller.ts
-
 import {
   BadRequestException,
   Body,
@@ -13,6 +11,7 @@ import {
   Post,
   Query,
   UploadedFile,
+  UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -27,7 +26,10 @@ import { SearchSongsUseCase } from './use-cases/search-songs.use-case';
 import { SongDTO } from 'src/entity-modules/song/song.dto';
 import { UploadSongDTO } from './dtos/upload-song.dto';
 import { UploadSongUseCase } from './use-cases/upload-song.use-case';
-import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+} from '@nestjs/platform-express';
 import { GetSongByIdUseCase } from './use-cases/get-song-by-id.use-case';
 import { GetRandomSongsUseCase } from './use-cases/get-random-songs.use-case';
 import { AddVideoToSongUseCase } from './use-cases/add-video-to-song.use-case';
@@ -124,7 +126,12 @@ export class SongsManagerController {
   }
 
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'), FileInterceptor('videoFile'))
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'file', maxCount: 1 },
+      { name: 'videoFile', maxCount: 1 },
+    ]),
+  )
   @ApiBody({
     description: 'Upload a new song',
     required: true,
@@ -145,9 +152,15 @@ export class SongsManagerController {
   @ApiConsumes('multipart/form-data')
   async uploadSong(
     @Body() body: UploadSongDTO,
-    @UploadedFile() file: Express.Multer.File,
-    @UploadedFile('videoFile') videoFile?: Express.Multer.File,
+    @UploadedFiles()
+    files: {
+      file?: Express.Multer.File[];
+      videoFile?: Express.Multer.File[];
+    },
   ) {
+    const file = files.file?.[0];
+    const videoFile = files.videoFile?.[0];
+    if (!file) throw new BadRequestException('File is required');
     return this.uploadSongUseCase.execute(body, file, videoFile);
   }
 
