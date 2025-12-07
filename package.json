@@ -95,8 +95,7 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node",
-    "coverageProvider": "v8"
+    "testEnvironment": "node"
   },
   "nyc": {
     "extends": "@istanbuljs/nyc-config-typescript",
