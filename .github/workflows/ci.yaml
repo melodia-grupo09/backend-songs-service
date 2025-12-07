@@ -48,7 +48,7 @@ jobs:
       run: npm run lint
 
     - name: Run Coverage and Update Badge
-      run: npm run test:cov:all
+      run: npm run test:cov:all && npm run coverage:update-badge
       env:
         TEST_DATABASE_URL: mongodb://user:password@localhost:27017/songs_test?authSource=admin
         NODE_ENV: testing
@@ -58,3 +58,4 @@ jobs:
       with:
         commit_message: "chore: update coverage badge"
         file_pattern: README.md
+        push_options: '--no-verify'
