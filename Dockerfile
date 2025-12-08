@@ -17,9 +17,14 @@ RUN npm prune --omit=dev
 # ---- Production Stage ----
 FROM base AS production
 
+ENV DD_API_KEY=${DD_API_KEY}
+ENV DD_SITE="datadoghq.com"
+ENV DD_REMOTE_UPDATES=true
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends ffmpeg && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    bash -c "$(curl -L https://install.datadoghq.com/scripts/install_script_agent7.sh)"
 
 # Copy dependencies
 COPY --from=build /app/node_modules ./node_modules
