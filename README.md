@@ -63,6 +63,8 @@ Asegúrate de tener un archivo `.env` configurado en la raíz del proyecto con l
 ### 4. Iniciar el Servidor
 
 ```bash
+docker compose up -d
+
 # Modo desarrollo (con watch)
 npm run start:dev
 
