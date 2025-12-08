@@ -1,5 +1,7 @@
 #!/bin/bash
 echo "Iniciando Datadog Agent..."
-/opt/datadog-agent/bin/agent/agent run &
+
+service datadog-agent start
+
 sleep 5
-exec "$@"
+node dist/src/main

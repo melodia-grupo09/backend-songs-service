@@ -36,6 +36,8 @@ COPY --from=build /app/node_modules ./node_modules
 # Copy the built application from the 'build' stage.
 COPY --from=build /app/dist ./dist
 
+COPY docker-entrypoint.sh .
+RUN chmod +x docker-entrypoint.sh
+
 EXPOSE 3000
-ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["node", "dist/src/main.js"]
+CMD ["./docker-entrypoint.sh"]
