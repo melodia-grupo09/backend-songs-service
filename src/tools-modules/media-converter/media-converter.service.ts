@@ -40,9 +40,9 @@ export class MediaConverterService {
     });
   }
 
-  async convertVideoToHLS(
+  async *convertVideoToHLS(
     file: Express.Multer.File,
-  ): Promise<{ fileName: string; buffer: Buffer }[]> {
+  ): AsyncGenerator<{ fileName: string; buffer: Buffer }> {
     const tempDir = path.join(os.tmpdir(), `hls-proc-${randomUUID()}`);
     const inputFilePath = path.join(tempDir, 'input_video');
     const outputFileName = 'playlist.m3u8';
@@ -53,49 +53,40 @@ export class MediaConverterService {
     }
     fs.writeFileSync(inputFilePath, file.buffer);
 
-    return new Promise((resolve, reject) => {
-      Ffmpeg(inputFilePath)
-        .outputOptions([
-          '-c:v libx264',
-          '-crf 23',
-          '-preset medium',
-          '-c:a aac',
-          '-b:a 128k',
-          '-hls_time 10',
-          '-hls_list_size 0',
-          '-f hls',
-        ])
-        .output(outputFilePath)
-        .on('end', () => {
-          try {
-            const files = fs.readdirSync(tempDir);
-            const results: { fileName: string; buffer: Buffer }[] = [];
+    try {
+      await new Promise<void>((resolve, reject) => {
+        Ffmpeg(inputFilePath)
+          .outputOptions([
+            '-c:v libx264',
+            '-crf 23',
+            '-preset medium',
+            '-c:a aac',
+            '-b:a 128k',
+            '-hls_time 10',
+            '-hls_list_size 0',
+            '-f hls',
+          ])
+          .output(outputFilePath)
+          .on('end', () => resolve())
+          .on('error', (err) => {
+            reject(new Error(`FFMPEG HLS Error: ${err.message}`));
+          })
+          .run();
+      });
 
-            for (const fileName of files) {
-              if (fileName === 'input_video') continue;
-              const filePath = path.join(tempDir, fileName);
-              const buffer = fs.readFileSync(filePath);
-              results.push({ fileName, buffer });
-            }
+      const files = fs.readdirSync(tempDir);
 
-            this.cleanupTempDir(tempDir);
-            resolve(results);
-          } catch (err) {
-            reject(
-              new Error(
-                typeof err.message === 'string'
-                  ? (err.message as string)
-                  : 'Unknown error during HLS processing',
-              ),
-            );
-          }
-        })
-        .on('error', (err) => {
-          this.cleanupTempDir(tempDir);
-          reject(new Error(`FFMPEG HLS Error: ${err.message}`));
-        })
-        .run();
-    });
+      for (const fileName of files) {
+        if (fileName === 'input_video') continue;
+        const filePath = path.join(tempDir, fileName);
+        const buffer = fs.readFileSync(filePath);
+        yield { fileName, buffer };
+        // Optional: unlink immediately after yield if we want to be super aggressive with disk space,
+        // but the main goal here is RAM.
+      }
+    } finally {
+      this.cleanupTempDir(tempDir);
+    }
   }
 
   private parseDurationToSeconds(durationString: string): number {

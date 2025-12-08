@@ -8,12 +8,10 @@ export class MediaConverterServiceMock {
     };
   }
 
-  async convertVideoToHLS(
+  async *convertVideoToHLS(
     file: Express.Multer.File,
-  ): Promise<{ fileName: string; buffer: Buffer }[]> {
-    return [
-      { fileName: 'playlist.m3u8', buffer: Buffer.from('#EXTM3U') },
-      { fileName: 'segment0.ts', buffer: Buffer.from('video data') },
-    ];
+  ): AsyncGenerator<{ fileName: string; buffer: Buffer }> {
+    yield { fileName: 'playlist.m3u8', buffer: Buffer.from('#EXTM3U') };
+    yield { fileName: 'segment0.ts', buffer: Buffer.from('video data') };
   }
 }

@@ -54,17 +54,14 @@ export class UploadSongUseCase {
     );
 
     if (videoFile !== undefined) {
-      const hlsFiles =
-        await this.mediaConverterService.convertVideoToHLS(videoFile);
-      for (const file of hlsFiles) {
+      const hlsFiles = this.mediaConverterService.convertVideoToHLS(videoFile);
+      for await (const file of hlsFiles) {
         const videoPath = `songs/${song.id}/video/${file.fileName}`;
         let mimeType = 'video/mp2t';
         if (file.fileName.endsWith('.m3u8')) {
           mimeType = 'application/x-mpegURL';
         }
-        uploadPromises.push(
-          this.firebaseStorage.uploadFile(videoPath, file.buffer, mimeType),
-        );
+        await this.firebaseStorage.uploadFile(videoPath, file.buffer, mimeType);
       }
       song.setHasVideo(true);
     }

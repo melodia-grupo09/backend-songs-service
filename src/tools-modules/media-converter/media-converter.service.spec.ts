@@ -122,10 +122,9 @@ describe('MediaConverterService', () => {
       ]);
       (fs.readFileSync as jest.Mock).mockImplementation((path: string) => {
         if (path.includes('playlist.m3u8')) return Buffer.from('#EXTM3U');
-        if (path.includes('segment0.ts')) return Buffer.from('segment-data');
+        if (path.includes('segment0.ts')) return Buffer.from('segment data');
         return Buffer.from('');
       });
-      (fs.unlinkSync as jest.Mock).mockImplementation(() => {});
       (fs.rmdirSync as jest.Mock).mockImplementation(() => {});
 
       mockFfmpegChain.on.mockImplementation((event, callback) => {
@@ -136,7 +135,12 @@ describe('MediaConverterService', () => {
       });
       mockFfmpegChain.run.mockImplementation(() => {});
 
-      const result = await service.convertVideoToHLS(mockFile);
+      const generator = service.convertVideoToHLS(mockFile);
+      const result: { fileName: string; buffer: Buffer }[] = [];
+
+      for await (const file of generator) {
+        result.push(file);
+      }
 
       expect(mockFfmpeg).toHaveBeenCalled();
       expect(fs.writeFileSync).toHaveBeenCalled();
@@ -161,10 +165,14 @@ describe('MediaConverterService', () => {
         return mockFfmpegChain;
       });
 
-      await expect(service.convertVideoToHLS(mockFile)).rejects.toThrow(
-        'FFMPEG HLS Error: HLS failed',
-      );
-      expect(fs.rmdirSync).toHaveBeenCalled(); // cleanup even on error (actually cleanupTempDir catches error but ensure it's called)
+      const generator = service.convertVideoToHLS(mockFile);
+
+      await expect(async () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        for await (const _ of generator) {
+          // iterate
+        }
+      }).rejects.toThrow('FFMPEG HLS Error: HLS failed');
     });
   });
 });

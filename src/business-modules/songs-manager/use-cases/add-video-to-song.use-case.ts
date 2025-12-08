@@ -20,22 +20,18 @@ export class AddVideoToSongUseCase {
     if (!song) {
       throw new NotFoundException('Song not found');
     }
-    const hlsFiles =
-      await this.mediaConverterService.convertVideoToHLS(videoFile);
-    const uploadPromises: Promise<any>[] = [];
-
-    for (const file of hlsFiles) {
+    const hlsFiles = this.mediaConverterService.convertVideoToHLS(videoFile);
+    // HLS files are uploaded serially to save memory
+    for await (const file of hlsFiles) {
       const videoPath = `songs/${song.id}/video/${file.fileName}`;
       let mimeType = 'video/mp2t';
       if (file.fileName.endsWith('.m3u8')) {
         mimeType = 'application/x-mpegURL';
       }
-      uploadPromises.push(
-        this.firebaseStorage.uploadFile(videoPath, file.buffer, mimeType),
-      );
+      await this.firebaseStorage.uploadFile(videoPath, file.buffer, mimeType);
     }
     song.setHasVideo(true);
-    await Promise.all([...uploadPromises, this.songRepository.flush()]);
+    await this.songRepository.flush();
     return song.toDTO(SongDTO);
   }
 }
