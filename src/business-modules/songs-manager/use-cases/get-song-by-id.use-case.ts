@@ -11,6 +11,12 @@ export class GetSongByIdUseCase {
     if (song === null) {
       throw new NotFoundException(`Song with ID ${id} not found`);
     }
+    if (!song.availability?.regions?.length) {
+      song.availability = {
+        policy: song.availability?.policy ?? 'global-allow',
+        regions: [{ code: 'global', allowed: true, status: 'published' }],
+      };
+    }
     return song.toDTO(SongDTO);
   }
 }
