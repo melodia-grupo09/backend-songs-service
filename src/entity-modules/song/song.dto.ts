@@ -6,8 +6,16 @@ import {
   IsString,
   ValidateNested,
   IsBoolean,
+  IsOptional,
+  IsDateString,
+  IsIn,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import {
+  AvailabilityRegion,
+  SongAppearance,
+  SongAuditEntry,
+} from './song.entity';
 
 export class ArtistDTO {
   @ApiProperty({
@@ -60,4 +68,53 @@ export class SongDTO extends BaseEntityDTO {
   })
   @IsBoolean()
   hasVideo: boolean;
+
+  @ApiProperty({
+    type: String,
+    example: '2025-02-14',
+    required: false,
+    description: 'Release date of the song',
+  })
+  @IsOptional()
+  @IsDateString()
+  releaseDate?: string | null;
+
+  @ApiProperty({
+    enum: ['scheduled', 'published', 'region-blocked', 'blocked'],
+    example: 'published',
+    description: 'Base availability status for the song',
+  })
+  @IsIn(['scheduled', 'published', 'region-blocked', 'blocked'])
+  status: string;
+
+  @ApiProperty({
+    type: String,
+    required: false,
+    description: 'Scheduled publish datetime',
+  })
+  @IsOptional()
+  @IsDateString()
+  programmedAt?: string | null;
+
+  @ApiProperty({
+    type: Object,
+    description: 'Regional availability policy and regions',
+  })
+  availability: { policy: string; regions: AvailabilityRegion[] };
+
+  @ApiProperty({
+    type: [Object],
+    description: 'Collections or playlists where the song appears',
+    required: false,
+  })
+  @IsOptional()
+  appearances?: SongAppearance[];
+
+  @ApiProperty({
+    type: [Object],
+    description: 'Admin/audit trail of availability actions',
+    required: false,
+  })
+  @IsOptional()
+  auditLog?: SongAuditEntry[];
 }
