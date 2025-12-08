@@ -10,7 +10,7 @@ import {
   IsDateString,
   IsIn,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   AvailabilityRegion,
   SongAppearance,
@@ -77,6 +77,11 @@ export class SongDTO extends BaseEntityDTO {
   })
   @IsOptional()
   @IsDateString()
+  @Transform(
+    ({ value }): string | null =>
+      value instanceof Date ? value.toISOString() : value,
+    { toClassOnly: true },
+  )
   releaseDate?: string | null;
 
   @ApiProperty({
@@ -94,6 +99,11 @@ export class SongDTO extends BaseEntityDTO {
   })
   @IsOptional()
   @IsDateString()
+  @Transform(
+    ({ value }): string | null =>
+      value instanceof Date ? value.toISOString() : value,
+    { toClassOnly: true },
+  )
   programmedAt?: string | null;
 
   @ApiProperty({
