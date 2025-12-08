@@ -1,5 +1,6 @@
 import { ListSongsUseCase } from './list-songs.use-case';
 import { SongRepository } from 'src/entity-modules/song/song.repository';
+import { ReleaseInfoService } from '../services/release-info.service';
 import type { Song } from 'src/entity-modules/song/song.entity';
 
 const createSong = (overrides: Partial<Song> = {}): Song =>
@@ -22,12 +23,17 @@ describe('ListSongsUseCase', () => {
   const mockRepository = {
     listWithFilters: jest.fn(),
   };
+  const mockReleaseInfoService = {
+    getReleaseDates: jest.fn(),
+  };
   const useCase = new ListSongsUseCase(
     mockRepository as unknown as SongRepository,
+    mockReleaseInfoService as unknown as ReleaseInfoService,
   );
 
   beforeEach(() => {
     jest.resetAllMocks();
+    mockReleaseInfoService.getReleaseDates.mockResolvedValue({});
   });
 
   it('adds the global region when no regions exist and returns paging info', async () => {
@@ -79,5 +85,29 @@ describe('ListSongsUseCase', () => {
     expect(result.total).toBe(1);
     expect(result.items[0].id).toBe('region-blocked');
     expect(result.items[0].effectiveStatus).toBe('Region blocked');
+  });
+
+  it('prefers release info when available and falls back to the entity date', async () => {
+    const song = createSong({
+      id: 'release-song',
+      albumId: 'release-123',
+      releaseDate: '2024-01-01',
+    });
+    mockRepository.listWithFilters.mockResolvedValue([song]);
+
+    mockReleaseInfoService.getReleaseDates.mockResolvedValueOnce({
+      'release-123': '2024-05-02T00:00:00.000Z',
+    });
+    const result = await useCase.execute({ page: 1, limit: 5 });
+    expect(mockReleaseInfoService.getReleaseDates).toHaveBeenCalledWith([
+      'release-123',
+    ]);
+    expect(result.items[0].releaseDate).toBe('2024-05-02T00:00:00.000Z');
+
+    mockReleaseInfoService.getReleaseDates.mockResolvedValueOnce({});
+    const fallbackResult = await useCase.execute({ page: 1, limit: 5 });
+    expect(fallbackResult.items[0].releaseDate).toBe(
+      new Date('2024-01-01').toISOString(),
+    );
   });
 });

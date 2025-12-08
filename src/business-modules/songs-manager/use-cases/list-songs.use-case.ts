@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { SongRepository } from 'src/entity-modules/song/song.repository';
 import { getEffectiveStatus } from 'src/utils/status.util';
+import { ReleaseInfoService } from '../services/release-info.service';
 
 interface ListSongsParams {
   q?: string;
@@ -16,7 +17,10 @@ interface ListSongsParams {
 
 @Injectable()
 export class ListSongsUseCase {
-  constructor(private readonly songRepository: SongRepository) {}
+  constructor(
+    private readonly songRepository: SongRepository,
+    private readonly releaseInfoService: ReleaseInfoService,
+  ) {}
 
   async execute(params: ListSongsParams) {
     const { page, limit } = params;
@@ -45,18 +49,31 @@ export class ListSongsUseCase {
 
     const total = filtered.length;
     const start = (page - 1) * limit;
-    const items = filtered.slice(start, start + limit).map((song) => {
+    const pageSongs = filtered.slice(start, start + limit);
+    const releaseDateMap = await this.releaseInfoService.getReleaseDates(
+      pageSongs
+        .map((song) => song.albumId)
+        .filter((albumId): albumId is string => Boolean(albumId)),
+    );
+
+    const items = pageSongs.map((song) => {
       const effectiveStatus = getEffectiveStatus(
         song.status,
         song.availability?.regions ?? [],
       );
+      const releaseDateFromAlbum =
+        song.albumId && releaseDateMap[song.albumId]
+          ? releaseDateMap[song.albumId]
+          : undefined;
+      const releaseDate =
+        releaseDateFromAlbum ?? this.formatReleaseDate(song.releaseDate);
       return {
         id: song.id,
         type: 'song',
         title: song.title,
         artist: song.artists?.[0]?.name ?? 'Unknown artist',
         collection: song.albumId ?? 'Single',
-        releaseDate: song.releaseDate ?? undefined,
+        releaseDate,
         effectiveStatus,
         hasVideo: song.hasVideo,
         regions: song.availability?.regions ?? [],
@@ -64,5 +81,16 @@ export class ListSongsUseCase {
     });
 
     return { items, total };
+  }
+
+  private formatReleaseDate(value?: Date | string | null): string | undefined {
+    if (!value) {
+      return undefined;
+    }
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return undefined;
+    }
+    return date.toISOString();
   }
 }
