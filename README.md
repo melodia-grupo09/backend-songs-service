@@ -2,7 +2,7 @@
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
 <p align="center">
-  <img src="https://img.shields.io/badge/Coverage-75%25-yellow" alt="Coverage" />
+  <img src="https://img.shields.io/badge/Coverage-74%25-yellow" alt="Coverage" />
 </p>
 
 # Songs Service Microservice
