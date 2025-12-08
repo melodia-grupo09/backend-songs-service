@@ -17,9 +17,13 @@ RUN npm prune --omit=dev
 # ---- Production Stage ----
 FROM base AS production
 
-ENV DD_API_KEY=${DD_API_KEY}
-ENV DD_SITE="datadoghq.com"
+ARG DD_API_KEY
+ARG DD_SITE
+
+ENV DD_API_KEY=$DD_API_KEY
+ENV DD_SITE=$DD_SITE
 ENV DD_REMOTE_UPDATES=true
+ENV DD_INSTALL_ONLY=true
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends ffmpeg && \
@@ -33,4 +37,5 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 
 EXPOSE 3000
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["node", "dist/src/main.js"]
