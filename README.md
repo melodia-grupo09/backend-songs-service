@@ -1,96 +1,73 @@
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
+<p align="center">
+  <img src="https://img.shields.io/badge/Coverage-83%25-brightgreen" alt="Coverage" />
 </p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+# Songs Service Microservice
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Este microservicio es el encargado de la gestión de canciones. Su responsabilidad abarca la administración y entrega por streaming de canciones, hasta el procesamiento y almacenamiento de los archivos de audio y video.
 
-## Project setup
+## 🧪 Estrategia de Testing
 
+El proyecto utiliza testings de integración y unitarios. Los testings de integración son realizados con Cucumber y los testings unitarios con Jest.
+
+### Business Modules (Integración)
+Para los módulos de negocio, utilizamos **Cucumber**. Esto nos permite definir pruebas de integración basadas en comportamiento (BDD) que verifican que los flujos completos de la aplicación funcionen como se espera.
+
+- **Herramienta:** Cucumber
+- **Ubicación:** `test/`
+- **Comando:** `npm run test:e2e`
+
+### Tools & Utils (Unitarios)
+Para las herramientas internas, helpers y utilidades que no dependen directamente de la lógica de negocio compleja o bases de datos, utilizamos **Jest** para pruebas unitarias rápidas y aisladas.
+
+- **Herramienta:** Jest
+- **Ubicación:** `src/**/*.spec.ts`
+- **Comando:** `npm run test`
+
+### Coverage Combinado
+Contamos con un mecanismo para unificar el reporte de coverage de ambas herramientas.
+- **Comando:** `npm run test:cov:all`
+
+## 🛡️ Calidad y CI/CD
+
+### Husky
+Utilizamos **Husky** para gestionar nuestros Git Hooks. Esto asegura que antes de cada commit o push, el código cumpla con los estándares de calidad definidos (linting, formatting), evitando que código con errores llegue al repositorio.
+
+### Integración Continua
+Nuestro pipeline de CI en GitHub Actions se encarga de:
+1. Validar el código (Linting).
+2. Ejecutar la suite completa de tests.
+3. Generar el reporte de cobertura combinado.
+4. Actualizar automáticamente el badge de coverage en este README.
+
+## 🚀 Ejecución Local
+
+Para correr el proyecto en local, hay que seguir estos pasos:
+
+### 1. Prerrequisitos
+- Node.js (versión 22 recomendada)
+- Docker para levantar el servicio de MongoDB.
+
+### 2. Instalación
+Instala las dependencias del proyecto:
 ```bash
-$ npm install
+npm install
 ```
 
-## Compile and run the project
+### 3. Variables de Entorno
+Asegúrate de tener un archivo `.env` configurado en la raíz del proyecto con las variables necesarias (DB URL, Credenciales de Firebase, etc.).
+
+### 4. Iniciar el Servidor
 
 ```bash
-# development
-$ npm run start
+# Modo desarrollo (con watch)
+npm run start:dev
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+# Modo producción
+npm run start:prod
 ```
 
-## Run tests
-
-```bash
-# unit tests
-# e2e tests (Cucumber)
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+El servicio estará disponible en `http://localhost:3000` (o el puerto configurado).

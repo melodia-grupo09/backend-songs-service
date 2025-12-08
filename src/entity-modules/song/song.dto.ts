@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { BaseEntityDTO } from '../base.dto';
-import { IsArray, IsNumber, IsString, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsNumber,
+  IsString,
+  ValidateNested,
+  IsBoolean,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class ArtistDTO {
@@ -52,5 +58,6 @@ export class SongDTO extends BaseEntityDTO {
     example: false,
     description: 'Indicates if the song has an associated video',
   })
+  @IsBoolean()
   hasVideo: boolean;
 }

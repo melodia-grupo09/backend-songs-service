@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { After, Before, setWorldConstructor, Then } from '@cucumber/cucumber';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -10,6 +11,10 @@ import { MikroORM } from '@mikro-orm/mongodb';
 import assert from 'assert';
 import supertest from 'supertest';
 import { App } from 'supertest/types';
+import { FirebaseStorage } from '../../src/tools-modules/firebase/firebase.storage'; // Adjust path if needed
+import { FirebaseStorageMock } from './mocks/firebase-storage.mock';
+import { MediaConverterService } from '../../src/tools-modules/media-converter/media-converter.service';
+import { MediaConverterServiceMock } from './mocks/media-converter.mock';
 
 Before(async function (this: TestWorld) {
   process.env.NODE_ENV = 'testing';
@@ -20,9 +25,15 @@ Before(async function (this: TestWorld) {
     .useValue({
       driver: MongoDriver,
       debug: false,
-      clientUrl: process.env.DATABASE_URL,
+      clientUrl: process.env.TEST_DATABASE_URL,
       entities: ['src/**/*.entity.ts'],
     })
+    .overrideProvider(FirebaseStorage)
+    .useValue(new FirebaseStorageMock())
+    .overrideProvider('FIREBASE_APP')
+    .useValue({}) // Mock the Firebase App to prevent initialization
+    .overrideProvider(MediaConverterService)
+    .useValue(new MediaConverterServiceMock())
     .compile();
 
   this.app = moduleRef.createNestApplication();
@@ -43,15 +54,20 @@ Before(async function (this: TestWorld) {
 });
 
 After(async function (this: TestWorld) {
-  const orm = this.app.get(MikroORM);
-  const generator = orm.getSchemaGenerator();
-  await generator.dropSchema();
-  await this.app.close();
+  if (this.app) {
+    const orm = this.app.get(MikroORM);
+    const generator = orm.getSchemaGenerator();
+    await generator.dropSchema();
+    await this.app.close();
+  }
 });
 
 export class TestWorld {
   public app!: INestApplication<App>;
   public response?: supertest.Response;
+  public lastUploadedSongId?: string;
+
+  public uploadedSongs: Map<string, string> = new Map();
 
   constructor() {
     // this.someEntities = new Map<string, SomeEntityDTO>();
@@ -71,7 +87,7 @@ Then(
     assert.strictEqual(
       this.response.status,
       statusCode,
-      `Expected status code ${statusCode} but got ${this.response.status}`,
+      `Expected status code ${statusCode} but got ${this.response.status}. Body: ${JSON.stringify(this.response.body)}`,
     );
   },
 );
