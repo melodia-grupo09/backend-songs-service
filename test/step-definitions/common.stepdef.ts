@@ -16,10 +16,6 @@ import { FirebaseStorageMock } from './mocks/firebase-storage.mock';
 import { MediaConverterService } from '../../src/tools-modules/media-converter/media-converter.service';
 import { MediaConverterServiceMock } from './mocks/media-converter.mock';
 
-const testDatabaseUrl = process.env.TEST_DATABASE_URL;
-if (!testDatabaseUrl)
-  throw new Error('Missing TEST_DATABASE_URL env variable for e2e tests.');
-
 Before(async function (this: TestWorld) {
   process.env.NODE_ENV = 'testing';
   const moduleRef: TestingModule = await Test.createTestingModule({
@@ -29,7 +25,7 @@ Before(async function (this: TestWorld) {
     .useValue({
       driver: MongoDriver,
       debug: false,
-      clientUrl: testDatabaseUrl,
+      clientUrl: process.env.TEST_DATABASE_URL,
       entities: ['src/**/*.entity.ts'],
     })
     .overrideProvider(FirebaseStorage)
