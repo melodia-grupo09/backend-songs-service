@@ -28,7 +28,8 @@ ENV DD_INSTALL_ONLY=true
 RUN apt-get update && \
     apt-get install -y --no-install-recommends ffmpeg && \
     rm -rf /var/lib/apt/lists/* && \
-    bash -c "$(curl -L https://install.datadoghq.com/scripts/install_script_agent7.sh)"
+    bash -c "$(curl -L https://install.datadoghq.com/scripts/install_script_agent7.sh)" && \
+    useradd dd-agent
 
 # Copy dependencies
 COPY --from=build /app/node_modules ./node_modules
