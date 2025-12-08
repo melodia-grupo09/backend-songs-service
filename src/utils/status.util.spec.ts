@@ -23,31 +23,31 @@ describe('getEffectiveStatus', () => {
       name: 'admin block from base status',
       base: 'blocked',
       regions: [region()],
-      expected: 'Bloqueado-admin',
+      expected: 'Admin blocked',
     },
     {
       name: 'admin block from region',
       base: 'published',
       regions: [region({ status: 'admin-blocked' })],
-      expected: 'Bloqueado-admin',
+      expected: 'Admin blocked',
     },
     {
       name: 'region blocked when no admin override',
       base: 'published',
       regions: [region({ status: 'region-blocked' })],
-      expected: 'No-disponible-region',
+      expected: 'Region blocked',
     },
     {
-      name: 'scheduled yields Programado when no blocks',
+      name: 'scheduled yields Scheduled when no blocks',
       base: 'scheduled',
       regions: [region({ status: 'scheduled' })],
-      expected: 'Programado',
+      expected: 'Scheduled',
     },
     {
       name: 'published default',
       base: 'published',
       regions: [region({ status: 'published' })],
-      expected: 'Publicado',
+      expected: 'Published',
     },
   ];
 

@@ -4,10 +4,10 @@ import {
 } from 'src/entity-modules/song/song.entity';
 
 export type EffectiveStatus =
-  | 'Bloqueado-admin'
-  | 'No-disponible-region'
-  | 'Programado'
-  | 'Publicado';
+  | 'Admin blocked'
+  | 'Region blocked'
+  | 'Scheduled'
+  | 'Published';
 
 export function getEffectiveStatus(
   baseStatus: SongStatus,
@@ -20,9 +20,9 @@ export function getEffectiveStatus(
       (status) => status === 'blocked' || status === 'admin-blocked',
     )
   )
-    return 'Bloqueado-admin';
+    return 'Admin blocked';
   if (statuses.some((status) => status === 'region-blocked'))
-    return 'No-disponible-region';
-  if (statuses.some((status) => status === 'scheduled')) return 'Programado';
-  return 'Publicado';
+    return 'Region blocked';
+  if (statuses.some((status) => status === 'scheduled')) return 'Scheduled';
+  return 'Published';
 }
