@@ -4,7 +4,6 @@ WORKDIR /app
 COPY package*.json ./
 
 # ---- Dependencies Stage ----
-# (splitted to leverage docker's cache)
 FROM base AS dependencies
 RUN npm ci
 
@@ -17,11 +16,6 @@ RUN npm prune --omit=dev
 
 # ---- Production Stage ----
 FROM base AS production
-
-# Declara el argumento que se recibirá durante la compilación
-ARG APP_VERSION
-# Establece la variable de entorno usando el valor del argumento
-ENV APP_VERSION=${APP_VERSION}
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends ffmpeg && \
