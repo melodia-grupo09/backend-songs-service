@@ -4,6 +4,7 @@ import {
   IsNumber,
   IsOptional,
   IsDate,
+  IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -28,4 +29,8 @@ export class UpdateSongMetadataDTO {
   @Type(() => Date)
   @IsDate()
   releaseDate?: Date | null;
+
+  @IsOptional()
+  @IsBoolean()
+  hasVideo?: boolean;
 }
