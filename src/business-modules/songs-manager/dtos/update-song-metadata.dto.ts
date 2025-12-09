@@ -33,8 +33,4 @@ export class UpdateSongMetadataDTO {
   @IsOptional()
   @IsBoolean()
   hasVideo?: boolean;
-
-  @IsOptional()
-  @IsBoolean()
-  explicit?: boolean;
 }

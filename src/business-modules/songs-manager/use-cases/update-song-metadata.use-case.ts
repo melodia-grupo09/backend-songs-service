@@ -34,8 +34,6 @@ export class UpdateSongMetadataUseCase {
 
     if (payload.hasVideo !== undefined) song.hasVideo = payload.hasVideo;
 
-    if (payload.explicit !== undefined) song.explicit = payload.explicit;
-
     await this.songRepository.flush();
 
     // Initialize availability if missing for consistent response

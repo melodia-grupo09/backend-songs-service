@@ -67,9 +67,6 @@ export class Song extends BaseEntity<Song> {
   @Property({ type: 'boolean', default: false })
   hasVideo: boolean = false;
 
-  @Property({ type: 'boolean', default: false })
-  explicit: boolean = false;
-
   @Property({ nullable: true })
   releaseDate: Date | null = null;
 
