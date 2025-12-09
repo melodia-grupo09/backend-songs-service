@@ -2,38 +2,22 @@ import { ApiProperty } from '@nestjs/swagger';
 import { BaseEntityDTO } from '../base.dto';
 import {
   IsArray,
-  IsNumber,
-  IsString,
-  ValidateNested,
   IsBoolean,
-  IsOptional,
   IsDateString,
   IsIn,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
+import { SongAppearance } from './song.entity';
 import {
-  AvailabilityRegion,
-  SongAppearance,
-  SongAuditEntry,
-} from './song.entity';
+  ArtistDTO,
+  SongAvailabilityDTO,
+  SongAuditEntryDTO,
+} from './dto-helpers';
 
-export class ArtistDTO {
-  @ApiProperty({
-    type: String,
-    example: '3',
-    description: 'ID of the artist',
-  })
-  @IsString()
-  id: string;
-
-  @ApiProperty({
-    type: String,
-    example: 'John Lennon',
-    description: 'Name of the artist',
-  })
-  @IsString()
-  name: string;
-}
 export class SongDTO extends BaseEntityDTO {
   @ApiProperty({
     type: String,
@@ -110,7 +94,9 @@ export class SongDTO extends BaseEntityDTO {
     type: Object,
     description: 'Regional availability policy and regions',
   })
-  availability: { policy: string; regions: AvailabilityRegion[] };
+  @ValidateNested()
+  @Type(() => SongAvailabilityDTO)
+  availability: SongAvailabilityDTO;
 
   @ApiProperty({
     type: [Object],
@@ -121,10 +107,20 @@ export class SongDTO extends BaseEntityDTO {
   appearances?: SongAppearance[];
 
   @ApiProperty({
-    type: [Object],
+    type: [SongAuditEntryDTO],
     description: 'Admin/audit trail of availability actions',
     required: false,
   })
   @IsOptional()
-  auditLog?: SongAuditEntry[];
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SongAuditEntryDTO)
+  auditLog?: SongAuditEntryDTO[];
 }
+
+export {
+  ArtistDTO,
+  SongAvailabilityDTO,
+  AvailabilityRegionDTO,
+  SongAuditEntryDTO,
+} from './dto-helpers';
