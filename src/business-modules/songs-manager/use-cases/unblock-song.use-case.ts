@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { SongRepository } from 'src/entity-modules/song/song.repository';
 import { getEffectiveStatus } from 'src/utils/status.util';
+import { SongDTO } from 'src/entity-modules/song/song.dto';
 
 interface UnblockSongPayload {
   actor?: string;
@@ -43,6 +44,11 @@ export class UnblockSongUseCase {
     });
 
     await this.songRepository.persistAndFlush(song);
-    return song;
+    const dto = song.toDTO(SongDTO);
+    return {
+      ...dto,
+      availability: song.availability,
+      auditLog: song.auditLog ?? [],
+    };
   }
 }

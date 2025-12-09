@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Song } from 'src/entity-modules/song/song.entity';
 import { SongRepository } from 'src/entity-modules/song/song.repository';
 import { getEffectiveStatus } from 'src/utils/status.util';
+import { SongDTO } from 'src/entity-modules/song/song.dto';
 
 interface BlockSongPayload {
   scope?: 'global' | 'regions';
@@ -76,6 +77,11 @@ export class BlockSongUseCase {
     });
 
     await this.songRepository.persistAndFlush(song);
-    return song;
+    const dto = song.toDTO(SongDTO);
+    return {
+      ...dto,
+      availability: song.availability,
+      auditLog: song.auditLog ?? [],
+    };
   }
 }

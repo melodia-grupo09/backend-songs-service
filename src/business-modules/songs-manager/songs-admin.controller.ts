@@ -95,7 +95,7 @@ export class SongsAdminController {
       validFrom?: string;
       validTo?: string;
     },
-  ) {
+  ): Promise<SongDTO> {
     return this.updateSongAvailabilityUseCase.execute(id, payload);
   }
 
@@ -109,12 +109,15 @@ export class SongsAdminController {
       reasonCode: string;
       actor?: string;
     },
-  ) {
+  ): Promise<SongDTO> {
     return this.blockSongUseCase.execute(id, payload);
   }
 
   @Post(':id/unblock')
-  async unblock(@Param('id') id: string, @Body() payload: { actor?: string }) {
+  async unblock(
+    @Param('id') id: string,
+    @Body() payload: { actor?: string },
+  ): Promise<SongDTO> {
     return this.unblockSongUseCase.execute(id, payload);
   }
 }
