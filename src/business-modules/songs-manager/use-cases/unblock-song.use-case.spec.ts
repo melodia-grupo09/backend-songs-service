@@ -19,6 +19,10 @@ const createSong = (): Song =>
     hasVideo: false,
     addAuditEntry: jest.fn(),
     setHasVideo: jest.fn(),
+    toDTO: jest.fn().mockReturnValue({
+      id: 'song-1',
+      title: 'Test Song',
+    }),
     appearances: [],
     auditLog: [],
     programmedAt: null,

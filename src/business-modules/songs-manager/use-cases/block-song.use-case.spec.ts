@@ -16,6 +16,10 @@ const createSong = (): Song =>
     hasVideo: false,
     addAuditEntry: jest.fn(),
     setHasVideo: jest.fn(),
+    toDTO: jest.fn().mockReturnValue({
+      id: 'song-1',
+      title: 'Test Song',
+    }),
     appearances: [],
     auditLog: [],
     programmedAt: null,
@@ -52,7 +56,9 @@ describe('BlockSongUseCase', () => {
       ),
     ).toBe(true);
     expect(mockRepository.persistAndFlush).toHaveBeenCalledWith(song);
-    expect(result).toBe(song);
+    expect(result.id).toBe('song-1');
+    expect(result.availability).toBe(song.availability);
+    expect(result.auditLog).toBe(song.auditLog);
   });
 
   it('applies a regional block when regions list is provided', async () => {

@@ -33,3 +33,36 @@ Feature: Songs Management
     Then the response status code is 201
     And the song should have video available
     And the response should match the Song DTO structure
+
+  Scenario: Update song availability globally
+    When I update the availability of song "Test Song" with status "region-blocked" and scope "global"
+    Then the response status code is 200
+    And the song status should be "region-blocked"
+    And all regions should have allowed set to false
+    And the audit log should contain an "availability-update" action
+
+  Scenario: Update song availability for specific regions
+    When I update the availability of song "Test Song" for regions "ar,mx" with status "region-blocked"
+    Then the response status code is 200
+    And the regions "ar,mx" should have status "region-blocked"
+    And the regions "ar,mx" should have allowed set to false
+    And the audit log should contain regions "AR,MX"
+
+  Scenario: Update song status to scheduled with validity period
+    When I update the availability of song "Test Song" with status "scheduled" from "2025-12-10T00:00:00Z" to "2025-12-31T23:59:59Z"
+    Then the response status code is 200
+    And the song status should be "scheduled"
+    And the audit log should contain validity information
+
+  Scenario: Block song globally using admin block
+    When I block song "Test Song" globally with reason code "legal"
+    Then the response status code is 201
+    And the song status should be "blocked"
+    And all regions should have status "admin-blocked"
+
+  Scenario: Unblock a previously blocked song
+    Given the song "Test Song" is blocked globally with reason code "policy"
+    When I unblock song "Test Song"
+    Then the response status code is 201
+    And the song status should be "published"
+    And all regions should have allowed set to true

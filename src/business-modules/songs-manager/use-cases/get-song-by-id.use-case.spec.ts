@@ -22,13 +22,18 @@ describe('GetSongByIdUseCase', () => {
 
   it('fills the default availability regions before returning the DTO', async () => {
     const stubSong = {
+      id: 'song-1',
+      status: 'published',
       availability: { policy: 'custom-policy', regions: [] },
+      auditLog: [],
       toDTO: jest.fn().mockReturnValue({
         id: 'song-1',
         title: 'Example',
       } as unknown as SongDTO),
     };
-    mockRepository.findOne.mockResolvedValue(stubSong);
+    mockRepository.findOne.mockImplementation((query: any) =>
+      query.id === 'song-1' ? Promise.resolve(stubSong) : Promise.resolve(null),
+    );
 
     const result = await useCase.execute('song-1');
 
@@ -56,6 +61,8 @@ describe('GetSongByIdUseCase', () => {
       },
     ];
     const stubSong = {
+      id: 'song-2',
+      status: 'published',
       availability,
       auditLog,
       toDTO: jest.fn().mockReturnValue({
@@ -63,7 +70,9 @@ describe('GetSongByIdUseCase', () => {
         title: 'Example 2',
       } as unknown as SongDTO),
     };
-    mockRepository.findOne.mockResolvedValue(stubSong);
+    mockRepository.findOne.mockImplementation((query: any) =>
+      query.id === 'song-2' ? Promise.resolve(stubSong) : Promise.resolve(null),
+    );
 
     const result = await useCase.execute('song-2');
 
@@ -105,6 +114,8 @@ describe('GetSongByIdUseCase', () => {
       },
     ];
     const stubSong = {
+      id: 'song-3',
+      status: 'published',
       availability,
       auditLog,
       toDTO: jest.fn().mockReturnValue({
@@ -112,7 +123,9 @@ describe('GetSongByIdUseCase', () => {
         title: 'Example 3',
       } as unknown as SongDTO),
     };
-    mockRepository.findOne.mockResolvedValue(stubSong);
+    mockRepository.findOne.mockImplementation((query: any) =>
+      query.id === 'song-3' ? Promise.resolve(stubSong) : Promise.resolve(null),
+    );
 
     const result = await useCase.execute('song-3');
 

@@ -173,3 +173,291 @@ When(
     }
   },
 );
+
+// Availability update step definitions
+When(
+  'I update the availability of song {string} with status {string} and scope {string}',
+  async function (
+    this: TestWorld,
+    songTitle: string,
+    status: string,
+    scope: string,
+  ) {
+    const songId = this.uploadedSongs.get(songTitle);
+    if (!songId) {
+      throw new Error(
+        `Song with title "${songTitle}" not found to update availability`,
+      );
+    }
+
+    this.response = await supertest(this.app.getHttpServer())
+      .patch(`/songs/admin/${songId}/availability`)
+      .send({
+        status,
+        scope,
+        actor: 'test-admin',
+        reason: 'Test update',
+      });
+  },
+);
+
+When(
+  'I update the availability of song {string} for regions {string} with status {string}',
+  async function (
+    this: TestWorld,
+    songTitle: string,
+    regions: string,
+    status: string,
+  ) {
+    const songId = this.uploadedSongs.get(songTitle);
+    if (!songId) {
+      throw new Error(
+        `Song with title "${songTitle}" not found to update availability`,
+      );
+    }
+
+    const regionList = regions.split(',').map((r) => r.trim());
+
+    this.response = await supertest(this.app.getHttpServer())
+      .patch(`/songs/admin/${songId}/availability`)
+      .send({
+        status,
+        scope: 'regions',
+        regions: regionList,
+        actor: 'test-admin',
+        reason: 'Regional update',
+      });
+  },
+);
+
+When(
+  'I update the availability of song {string} with status {string} from {string} to {string}',
+  async function (
+    this: TestWorld,
+    songTitle: string,
+    status: string,
+    validFrom: string,
+    validTo: string,
+  ) {
+    const songId = this.uploadedSongs.get(songTitle);
+    if (!songId) {
+      throw new Error(
+        `Song with title "${songTitle}" not found to update availability`,
+      );
+    }
+
+    this.response = await supertest(this.app.getHttpServer())
+      .patch(`/songs/admin/${songId}/availability`)
+      .send({
+        status,
+        validFrom,
+        validTo,
+        actor: 'scheduler',
+        // Don't provide reason so validity info is included in the generated details
+      });
+  },
+);
+
+const blockSongGlobally = async function (
+  this: TestWorld,
+  songTitle: string,
+  reasonCode: string,
+  saveResponse: boolean = true,
+) {
+  const songId = this.uploadedSongs.get(songTitle);
+  if (!songId) {
+    throw new Error(`Song with title "${songTitle}" not found to block`);
+  }
+
+  const response = await supertest(this.app.getHttpServer())
+    .post(`/songs/admin/${songId}/block`)
+    .send({
+      scope: 'global',
+      reasonCode,
+      actor: 'test-admin',
+    });
+
+  if (saveResponse) {
+    this.response = response;
+  }
+};
+
+When(
+  'I block song {string} globally with reason code {string}',
+  async function (this: TestWorld, songTitle: string, reasonCode: string) {
+    await blockSongGlobally.call(this, songTitle, reasonCode, true);
+  },
+);
+
+Given(
+  'the song {string} is blocked globally with reason code {string}',
+  async function (this: TestWorld, songTitle: string, reasonCode: string) {
+    await blockSongGlobally.call(this, songTitle, reasonCode, false);
+  },
+);
+
+When(
+  'I unblock song {string}',
+  async function (this: TestWorld, songTitle: string) {
+    const songId = this.uploadedSongs.get(songTitle);
+    if (!songId) {
+      throw new Error(`Song with title "${songTitle}" not found to unblock`);
+    }
+
+    this.response = await supertest(this.app.getHttpServer())
+      .post(`/songs/admin/${songId}/unblock`)
+      .send({
+        actor: 'test-admin',
+      });
+  },
+);
+
+Then(
+  'the song status should be {string}',
+  function (this: TestWorld, expectedStatus: string) {
+    assert.strictEqual(
+      this.response?.body.status,
+      expectedStatus,
+      `Expected status to be ${expectedStatus}`,
+    );
+  },
+);
+
+Then(
+  'all regions should have allowed set to {word}',
+  function (this: TestWorld, expectedAllowed: string) {
+    const song = this.response?.body;
+    assert.ok(song.availability, 'Song should have availability');
+    assert.ok(song.availability.regions, 'Availability should have regions');
+
+    const expectedBool = expectedAllowed === 'true';
+    const allMatch = song.availability.regions.every(
+      (region: any) => region.allowed === expectedBool,
+    );
+    assert.ok(
+      allMatch,
+      `All regions should have allowed=${expectedAllowed}, but some didn't match`,
+    );
+  },
+);
+
+Then(
+  'all regions should have status {string}',
+  function (this: TestWorld, expectedStatus: string) {
+    const song = this.response?.body;
+    assert.ok(song.availability, 'Song should have availability');
+    assert.ok(song.availability.regions, 'Availability should have regions');
+
+    const allMatch = song.availability.regions.every(
+      (region: any) => region.status === expectedStatus,
+    );
+    assert.ok(
+      allMatch,
+      `All regions should have status=${expectedStatus}, but some didn't match`,
+    );
+  },
+);
+
+Then(
+  'the audit log should contain an {string} action',
+  function (this: TestWorld, expectedAction: string) {
+    const song = this.response?.body;
+    assert.ok(song.auditLog, 'Song should have auditLog');
+    assert.ok(Array.isArray(song.auditLog), 'auditLog should be an array');
+
+    const hasAction = song.auditLog.some(
+      (entry: any) => entry.action === expectedAction,
+    );
+    assert.ok(hasAction, `Audit log should contain action "${expectedAction}"`);
+  },
+);
+
+Then(
+  'the regions {string} should have status {string}',
+  function (this: TestWorld, regions: string, expectedStatus: string) {
+    const song = this.response?.body;
+    const regionList = regions.split(',').map((r) => r.trim().toLowerCase());
+
+    assert.ok(song.availability, 'Song should have availability');
+    assert.ok(song.availability.regions, 'Availability should have regions');
+
+    regionList.forEach((regionCode) => {
+      const region = song.availability.regions.find(
+        (r: any) => r.code === regionCode,
+      );
+      assert.ok(region, `Region "${regionCode}" should exist`);
+      assert.strictEqual(
+        region.status,
+        expectedStatus,
+        `Region "${regionCode}" should have status "${expectedStatus}"`,
+      );
+    });
+  },
+);
+
+Then(
+  'the regions {string} should have allowed set to {word}',
+  function (this: TestWorld, regions: string, expectedAllowed: string) {
+    const song = this.response?.body;
+    const regionList = regions.split(',').map((r) => r.trim().toLowerCase());
+    const expectedBool = expectedAllowed === 'true';
+
+    assert.ok(song.availability, 'Song should have availability');
+    assert.ok(song.availability.regions, 'Availability should have regions');
+
+    regionList.forEach((regionCode) => {
+      const region = song.availability.regions.find(
+        (r: any) => r.code === regionCode,
+      );
+      assert.ok(region, `Region "${regionCode}" should exist`);
+      assert.strictEqual(
+        region.allowed,
+        expectedBool,
+        `Region "${regionCode}" should have allowed=${expectedAllowed}`,
+      );
+    });
+  },
+);
+
+Then(
+  'the audit log should contain regions {string}',
+  function (this: TestWorld, expectedRegions: string) {
+    const song = this.response?.body;
+    const regionList = expectedRegions.split(',').map((r) => r.trim());
+
+    assert.ok(song.auditLog, 'Song should have auditLog');
+    assert.ok(Array.isArray(song.auditLog), 'auditLog should be an array');
+
+    const latestEntry = song.auditLog[0];
+    assert.ok(latestEntry, 'Audit log should have at least one entry');
+    assert.ok(latestEntry.regions, 'Latest audit entry should have regions');
+
+    regionList.forEach((regionCode) => {
+      assert.ok(
+        latestEntry.regions.includes(regionCode),
+        `Audit log should contain region "${regionCode}"`,
+      );
+    });
+  },
+);
+
+Then(
+  'the audit log should contain validity information',
+  function (this: TestWorld) {
+    const song = this.response?.body;
+    assert.ok(song.auditLog, 'Song should have auditLog');
+    assert.ok(Array.isArray(song.auditLog), 'auditLog should be an array');
+    assert.ok(
+      song.auditLog.length > 0,
+      'Audit log should have at least one entry',
+    );
+
+    const latestEntry = song.auditLog[0];
+    assert.ok(latestEntry, 'Latest audit entry should exist');
+    assert.ok(latestEntry.details, 'Audit entry should have details');
+    assert.ok(
+      latestEntry.details.includes('validity'),
+      `Audit log details should contain validity information. Got: ${latestEntry.details}`,
+    );
+  },
+);
