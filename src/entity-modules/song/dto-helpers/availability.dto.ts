@@ -22,7 +22,7 @@ export class AvailabilityRegionDTO {
     example: 'published',
   })
   @IsIn(['published', 'scheduled', 'region-blocked', 'admin-blocked'])
-  status: string;
+  status: 'published' | 'scheduled' | 'region-blocked' | 'admin-blocked';
 }
 
 export class SongAvailabilityDTO {
