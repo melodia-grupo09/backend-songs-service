@@ -11,7 +11,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
-import { SongAppearance } from './song.entity';
+import { SongAppearance, SongAuditEntry } from './song.entity';
 import {
   ArtistDTO,
   SongAvailabilityDTO,
@@ -113,14 +113,11 @@ export class SongDTO extends BaseEntityDTO {
   })
   @IsOptional()
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => SongAuditEntryDTO)
-  auditLog?: SongAuditEntryDTO[];
+  auditLog?: SongAuditEntry[];
 }
 
 export {
   ArtistDTO,
   SongAvailabilityDTO,
   AvailabilityRegionDTO,
-  SongAuditEntryDTO,
 } from './dto-helpers';

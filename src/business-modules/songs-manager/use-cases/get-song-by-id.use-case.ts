@@ -17,6 +17,11 @@ export class GetSongByIdUseCase {
         regions: [{ code: 'global', allowed: true, status: 'published' }],
       };
     }
-    return song.toDTO(SongDTO);
+    const dto = song.toDTO(SongDTO);
+    return {
+      ...dto,
+      availability: song.availability,
+      auditLog: song.auditLog ?? [],
+    };
   }
 }

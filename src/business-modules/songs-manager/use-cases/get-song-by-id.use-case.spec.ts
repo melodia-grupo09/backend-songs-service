@@ -23,9 +23,10 @@ describe('GetSongByIdUseCase', () => {
   it('fills the default availability regions before returning the DTO', async () => {
     const stubSong = {
       availability: { policy: 'custom-policy', regions: [] },
-      toDTO: jest
-        .fn()
-        .mockReturnValue({ id: 'song-1', title: 'Example' } as SongDTO),
+      toDTO: jest.fn().mockReturnValue({
+        id: 'song-1',
+        title: 'Example',
+      } as unknown as SongDTO),
     };
     mockRepository.findOne.mockResolvedValue(stubSong);
 
@@ -35,6 +36,89 @@ describe('GetSongByIdUseCase', () => {
       { code: 'global', allowed: true, status: 'published' },
     ]);
     expect(stubSong.toDTO).toHaveBeenCalledWith(SongDTO);
-    expect(result).toEqual({ id: 'song-1', title: 'Example' });
+    expect(result).toMatchObject({ id: 'song-1', title: 'Example' });
+    expect(result.availability).toBe(stubSong.availability);
+    expect(result.auditLog).toEqual([]);
+  });
+
+  it('returns the entity availability and audit log after transformation', async () => {
+    const availability = {
+      policy: 'global-allow',
+      regions: [{ code: 'ar', allowed: true, status: 'published' }],
+    };
+    const auditLog = [
+      {
+        id: 'audit-1',
+        timestamp: '2025-12-09T14:09:48.912Z',
+        action: 'blocked-admin',
+        actor: 'lucia.arias',
+        details: 'Test audit entry',
+      },
+    ];
+    const stubSong = {
+      availability,
+      auditLog,
+      toDTO: jest.fn().mockReturnValue({
+        id: 'song-2',
+        title: 'Example 2',
+      } as unknown as SongDTO),
+    };
+    mockRepository.findOne.mockResolvedValue(stubSong);
+
+    const result = await useCase.execute('song-2');
+
+    expect(stubSong.toDTO).toHaveBeenCalledWith(SongDTO);
+    expect(result.availability).toBe(availability);
+    expect(result.auditLog).toBe(auditLog);
+  });
+
+  it('supports multiple audit entries with optional fields and mixed availability', async () => {
+    const availability = {
+      policy: 'region-first',
+      regions: [
+        { code: 'ar', allowed: false, status: 'region-blocked' },
+        { code: 'mx', allowed: true, status: 'published' },
+        { code: 'global', allowed: false, status: 'admin-blocked' },
+      ],
+    };
+    const auditLog = [
+      {
+        id: 'audit-2',
+        timestamp: '2025-12-10T10:00:00.000Z',
+        action: 'availability-update',
+        actor: 'lucia.arias',
+        details: 'Mixed availability',
+        scope: 'regions',
+        regions: ['AR', 'MX'],
+        reasonCode: 'quality',
+        previousState: 'Published',
+        newState: 'Region blocked',
+      },
+      {
+        id: 'audit-3',
+        timestamp: '2025-12-10T11:00:00.000Z',
+        action: 'blocked-admin',
+        actor: 'admin',
+        details: 'Global block',
+        scope: 'global',
+        newState: 'Admin blocked',
+      },
+    ];
+    const stubSong = {
+      availability,
+      auditLog,
+      toDTO: jest.fn().mockReturnValue({
+        id: 'song-3',
+        title: 'Example 3',
+      } as unknown as SongDTO),
+    };
+    mockRepository.findOne.mockResolvedValue(stubSong);
+
+    const result = await useCase.execute('song-3');
+
+    expect(stubSong.toDTO).toHaveBeenCalledWith(SongDTO);
+    expect(result.availability).toBe(availability);
+    expect(result.availability.regions).toEqual(availability.regions);
+    expect(result.auditLog).toBe(auditLog);
   });
 });
