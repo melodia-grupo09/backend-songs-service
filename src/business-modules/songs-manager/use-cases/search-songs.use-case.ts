@@ -10,8 +10,14 @@ export class SearchSongsUseCase {
     query: string,
     limit: number,
     page: number,
+    publishedOnly: boolean = true,
   ): Promise<SongDTO[]> {
-    const songs = await this.songRepository.searchByText(query, limit, page);
+    const songs = await this.songRepository.searchByText(
+      query,
+      limit,
+      page,
+      publishedOnly,
+    );
     return songs.map((song) => song.toDTO(SongDTO));
   }
 }

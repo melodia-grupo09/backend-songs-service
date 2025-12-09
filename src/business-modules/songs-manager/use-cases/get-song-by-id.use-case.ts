@@ -6,9 +6,9 @@ import { SongRepository } from 'src/entity-modules/song/song.repository';
 export class GetSongByIdUseCase {
   constructor(private readonly songRepository: SongRepository) {}
 
-  async execute(id: string): Promise<SongDTO> {
+  async execute(id: string, publishedOnly: boolean = true): Promise<SongDTO> {
     const song = await this.songRepository.findOne({ id });
-    if (song === null) {
+    if (song === null || (publishedOnly && song.status !== 'published')) {
       throw new NotFoundException(`Song with ID ${id} not found`);
     }
     if (!song.availability?.regions?.length) {

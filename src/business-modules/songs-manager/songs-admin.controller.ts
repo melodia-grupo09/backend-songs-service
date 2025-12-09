@@ -74,7 +74,7 @@ export class SongsAdminController {
   async getSong(
     @Param('id') id: string,
   ): Promise<SongDTO & { effectiveStatus: string }> {
-    const song = await this.getSongByIdUseCase.execute(id);
+    const song = await this.getSongByIdUseCase.execute(id, false);
     const effectiveStatus = getEffectiveStatus(
       song.status as SongStatus,
       song.availability?.regions ?? ([] as AvailabilityRegion[]),
