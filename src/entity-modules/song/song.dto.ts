@@ -64,6 +64,14 @@ export class SongDTO extends BaseEntityDTO {
   hasVideo: boolean;
 
   @ApiProperty({
+    type: Boolean,
+    example: false,
+    description: 'Indicates if the song contains explicit content',
+  })
+  @IsBoolean()
+  explicit: boolean;
+
+  @ApiProperty({
     type: String,
     example: '2025-02-14',
     required: false,
