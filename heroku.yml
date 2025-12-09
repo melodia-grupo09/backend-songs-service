@@ -1,7 +1,0 @@
-build:
-  docker:
-    web: Dockerfile
-  config:
-    DD_API_KEY: ${DD_API_KEY}
-    DD_SITE: "datadoghq.com"
-    DD_HOSTNAME: ${DD_HOSTNAME}
