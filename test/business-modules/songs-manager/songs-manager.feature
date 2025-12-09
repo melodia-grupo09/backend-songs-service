@@ -66,3 +66,35 @@ Feature: Songs Management
     Then the response status code is 201
     And the song status should be "published"
     And all regions should have allowed set to true
+
+  Scenario: Update song metadata - title only
+    When I update the metadata of song "Test Song" with title "Updated Title"
+    Then the response status code is 200
+    And the song title should be "Updated Title"
+    And the response should match the Song DTO structure
+
+  Scenario: Update song metadata - artists
+    When I update the metadata of song "Test Song" with artists '[{"id":"artist1","name":"New Artist"}]'
+    Then the response status code is 200
+    And the song should have 1 artist
+    And the first artist name should be "New Artist"
+
+  Scenario: Update song metadata - multiple fields
+    When I update the metadata of song "Test Song" with:
+      | field       | value                                      |
+      | title       | Completely New Title                       |
+      | artists     | [{"id":"a1","name":"Artist One"},{"id":"a2","name":"Artist Two"}] |
+      | duration    | 240                                        |
+      | albumId     | album-123                                  |
+    Then the response status code is 200
+    And the song title should be "Completely New Title"
+    And the song should have 2 artists
+    And the song duration should be 240
+    And the song albumId should be "album-123"
+
+  Scenario: Update song metadata - partial update preserves other fields
+    Given a song with title "Original Song" and file "test_song.mp3"
+    When I update the metadata of song "Original Song" with title "Modified Title"
+    Then the response status code is 200
+    And the song title should be "Modified Title"
+    And the song should still have its original duration

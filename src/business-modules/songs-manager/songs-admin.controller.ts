@@ -21,6 +21,8 @@ import { GetSongByIdUseCase } from './use-cases/get-song-by-id.use-case';
 import { UpdateSongAvailabilityUseCase } from './use-cases/update-song-availability.use-case';
 import { BlockSongUseCase } from './use-cases/block-song.use-case';
 import { UnblockSongUseCase } from './use-cases/unblock-song.use-case';
+import { UpdateSongMetadataUseCase } from './use-cases/update-song-metadata.use-case';
+import { UpdateSongMetadataDTO } from './dtos/update-song-metadata.dto';
 
 @ApiTags('songs-admin')
 @Controller('songs/admin')
@@ -29,6 +31,7 @@ export class SongsAdminController {
     private readonly listSongsUseCase: ListSongsUseCase,
     private readonly getSongByIdUseCase: GetSongByIdUseCase,
     private readonly updateSongAvailabilityUseCase: UpdateSongAvailabilityUseCase,
+    private readonly updateSongMetadataUseCase: UpdateSongMetadataUseCase,
     private readonly blockSongUseCase: BlockSongUseCase,
     private readonly unblockSongUseCase: UnblockSongUseCase,
   ) {}
@@ -80,6 +83,14 @@ export class SongsAdminController {
       song.availability?.regions ?? ([] as AvailabilityRegion[]),
     );
     return { ...song, effectiveStatus };
+  }
+
+  @Patch(':id')
+  async updateMetadata(
+    @Param('id') id: string,
+    @Body() payload: UpdateSongMetadataDTO,
+  ): Promise<SongDTO> {
+    return this.updateSongMetadataUseCase.execute(id, payload);
   }
 
   @Patch(':id/availability')

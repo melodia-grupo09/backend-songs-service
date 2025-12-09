@@ -38,6 +38,16 @@ export class SongDTO extends BaseEntityDTO {
   artists: ArtistDTO[];
 
   @ApiProperty({
+    type: String,
+    example: 'album-123',
+    required: false,
+    description: 'ID of the album this song belongs to',
+  })
+  @IsOptional()
+  @IsString()
+  albumId?: string | null;
+
+  @ApiProperty({
     type: Number,
     example: 183,
     description: 'Duration of the song in seconds',

@@ -461,3 +461,116 @@ Then(
     );
   },
 );
+
+// Metadata update step definitions
+When(
+  'I update the metadata of song {string} with title {string}',
+  async function (this: TestWorld, songTitle: string, newTitle: string) {
+    const songId = this.uploadedSongs.get(songTitle);
+    if (!songId) {
+      throw new Error(
+        `Song with title "${songTitle}" not found to update metadata`,
+      );
+    }
+
+    this.response = await supertest(this.app.getHttpServer())
+      .patch(`/songs/admin/${songId}`)
+      .send({ title: newTitle });
+  },
+);
+
+When(
+  'I update the metadata of song {string} with artists {string}',
+  async function (this: TestWorld, songTitle: string, artistsJson: string) {
+    const songId = this.uploadedSongs.get(songTitle);
+    if (!songId) {
+      throw new Error(
+        `Song with title "${songTitle}" not found to update metadata`,
+      );
+    }
+
+    const artists = JSON.parse(artistsJson);
+    this.response = await supertest(this.app.getHttpServer())
+      .patch(`/songs/admin/${songId}`)
+      .send({ artists });
+  },
+);
+
+When(
+  'I update the metadata of song {string} with:',
+  async function (this: TestWorld, songTitle: string, dataTable: any) {
+    const songId = this.uploadedSongs.get(songTitle);
+    if (!songId) {
+      throw new Error(
+        `Song with title "${songTitle}" not found to update metadata`,
+      );
+    }
+
+    const payload: any = {};
+    const rows = dataTable.rows();
+
+    for (const row of rows) {
+      const [field, value] = row;
+      if (field === 'artists') {
+        payload.artists = JSON.parse(value);
+      } else if (field === 'duration') {
+        payload.duration = parseInt(value, 10);
+      } else {
+        payload[field] = value;
+      }
+    }
+
+    this.response = await supertest(this.app.getHttpServer())
+      .patch(`/songs/admin/${songId}`)
+      .send(payload);
+  },
+);
+
+Then(
+  'the song should have {int} artist(s)',
+  function (this: TestWorld, expectedCount: number) {
+    const song = this.response?.body;
+    assert.ok(song.artists, 'Song should have artists');
+    assert.strictEqual(
+      song.artists.length,
+      expectedCount,
+      `Expected ${expectedCount} artist(s), got ${song.artists.length}`,
+    );
+  },
+);
+
+Then(
+  'the first artist name should be {string}',
+  function (this: TestWorld, expectedName: string) {
+    const song = this.response?.body;
+    assert.ok(song.artists, 'Song should have artists');
+    assert.ok(song.artists.length > 0, 'Song should have at least one artist');
+    assert.strictEqual(song.artists[0].name, expectedName);
+  },
+);
+
+Then(
+  'the song duration should be {int}',
+  function (this: TestWorld, expectedDuration: number) {
+    const song = this.response?.body;
+    assert.strictEqual(song.duration, expectedDuration);
+  },
+);
+
+Then(
+  'the song albumId should be {string}',
+  function (this: TestWorld, expectedAlbumId: string) {
+    const song = this.response?.body;
+    assert.strictEqual(song.albumId, expectedAlbumId);
+  },
+);
+
+Then(
+  'the song should still have its original duration',
+  function (this: TestWorld) {
+    const song = this.response?.body;
+    assert.ok(song.duration, 'Song should have a duration');
+    assert.strictEqual(typeof song.duration, 'number');
+    assert.ok(song.duration > 0, 'Duration should be greater than 0');
+  },
+);

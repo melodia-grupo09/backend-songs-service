@@ -13,6 +13,7 @@ import { AddVideoToSongUseCase } from './use-cases/add-video-to-song.use-case';
 import { SongsAdminController } from './songs-admin.controller';
 import { ListSongsUseCase } from './use-cases/list-songs.use-case';
 import { UpdateSongAvailabilityUseCase } from './use-cases/update-song-availability.use-case';
+import { UpdateSongMetadataUseCase } from './use-cases/update-song-metadata.use-case';
 import { BlockSongUseCase } from './use-cases/block-song.use-case';
 import { UnblockSongUseCase } from './use-cases/unblock-song.use-case';
 import { ReleaseInfoService } from './services/release-info.service';
@@ -43,6 +44,7 @@ import { ReleaseInfoService } from './services/release-info.service';
     AddVideoToSongUseCase,
     ListSongsUseCase,
     UpdateSongAvailabilityUseCase,
+    UpdateSongMetadataUseCase,
     BlockSongUseCase,
     UnblockSongUseCase,
     ReleaseInfoService,
